@@ -47,18 +47,18 @@ const Hero = () => {
               </Link>
             </section>
 
-            <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4 justify-items-end">
-              <div className="bg-primary-foreground/10 backdrop-blur-sm rounded-lg p-6 border border-primary-foreground/20 text-right">
+            <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+              <div className="bg-primary-foreground/10 backdrop-blur-sm rounded-lg p-6 border border-primary-foreground/20 text-center">
                 <Shield className="w-10 h-10 text-accent mb-3 mx-auto" />
                 <h3 className="font-semibold text-lg mb-2">Certified Authentication</h3>
                 <p className="text-sm text-primary-foreground/80">Expert graders with years of experience</p>
               </div>
-              <div className="bg-primary-foreground/10 backdrop-blur-sm rounded-lg p-6 border border-primary-foreground/20 text-right">
+              <div className="bg-primary-foreground/10 backdrop-blur-sm rounded-lg p-6 border border-primary-foreground/20 text-center">
                 <Award className="w-10 h-10 text-accent mb-3 mx-auto" />
                 <h3 className="font-semibold text-lg mb-2">Trusted Standards</h3>
                 <p className="text-sm text-primary-foreground/80">Industry-recognized grading system</p>
               </div>
-              <div className="bg-primary-foreground/10 backdrop-blur-sm rounded-lg p-6 border border-primary-foreground/20 text-right">
+              <div className="bg-primary-foreground/10 backdrop-blur-sm rounded-lg p-6 border border-primary-foreground/20 text-center">
                 <Clock className="w-10 h-10 text-accent mb-3 mx-auto" />
                 <h3 className="font-semibold text-lg mb-2">Fast Turnaround</h3>
                 <p className="text-sm text-primary-foreground/80">Quick processing without compromising quality</p>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
@@ -43,6 +43,15 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [stripeReady, setStripeReady] = useState(false);
+
+  // Debug Stripe loading
+  React.useEffect(() => {
+    if (stripe && elements) {
+      setStripeReady(true);
+      console.log('Stripe loaded successfully');
+    }
+  }, [stripe, elements]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -111,12 +120,29 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     style: {
       base: {
         fontSize: '16px',
-        color: '#424770',
+        color: '#ffffff',
+        fontFamily: '"Inter", "system-ui", sans-serif',
+        fontSmoothing: 'antialiased',
         '::placeholder': {
-          color: '#aab7c4',
+          color: '#9ca3af',
+        },
+        ':focus': {
+          color: '#ffffff',
+        },
+        ':hover': {
+          color: '#ffffff',
         },
       },
+      invalid: {
+        color: '#ef4444',
+        iconColor: '#ef4444',
+      },
+      complete: {
+        color: '#10b981',
+        iconColor: '#10b981',
+      },
     },
+    hidePostalCode: false,
   };
 
   if (paymentSuccess) {
@@ -127,13 +153,25 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         <p className="text-muted-foreground mb-6">
           Your order has been confirmed. We'll send you shipping instructions and tracking information via email.
         </p>
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <p className="text-sm text-green-800">
+        <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+          <p className="text-sm text-green-400">
             <strong>Order Total:</strong> £{amount.toFixed(2)}<br/>
             <strong>Service:</strong> {metadata.tier} ({metadata.cardCount} cards)<br/>
             <strong>Customer:</strong> {metadata.customerName}
           </p>
         </div>
+      </Card>
+    );
+  }
+
+  if (!stripe || !elements) {
+    return (
+      <Card className="p-8 text-center">
+        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-accent" />
+        <p className="text-muted-foreground">Loading payment form...</p>
+        <p className="text-xs text-muted-foreground mt-2">
+          If this takes too long, please refresh the page
+        </p>
       </Card>
     );
   }
@@ -147,10 +185,10 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
           <Shield className="w-5 h-5 text-green-500" />
         </div>
         
-        <div className="bg-gray-50 rounded-lg p-4 mb-6">
+        <div className="bg-muted/30 border border-border rounded-lg p-4 mb-6">
           <div className="flex justify-between items-center mb-2">
-            <span className="font-medium">Order Summary</span>
-            <span className="text-xl font-bold">£{amount.toFixed(2)}</span>
+            <span className="font-medium text-foreground">Order Summary</span>
+            <span className="text-xl font-bold text-accent">£{amount.toFixed(2)}</span>
           </div>
           <div className="text-sm text-muted-foreground">
             {metadata.tier} grading • {metadata.cardCount} cards
@@ -161,12 +199,17 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium mb-3">
+          <label className="block text-sm font-medium mb-3 text-foreground">
             Card Information
           </label>
-          <div className="border border-gray-300 rounded-md p-3 bg-white">
-            <CardElement options={cardElementOptions} />
+          <div className="border border-border rounded-md p-4 bg-card hover:bg-muted/10 focus-within:ring-2 focus-within:ring-accent/20 focus-within:border-accent/50 transition-all duration-200 min-h-[44px] flex items-center">
+            <div className="w-full">
+              <CardElement options={cardElementOptions} />
+            </div>
           </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            Enter your card number, expiry date, and CVC
+          </p>
         </div>
 
         {paymentError && (

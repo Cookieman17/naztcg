@@ -167,14 +167,14 @@ const Submit = () => {
 
             {!showPayment && (
               <>
-            <div className="mb-12 text-center">
-              <h1 className="text-4xl font-bold mb-4">Submit Cards for Grading</h1>
-              <p className="text-lg text-muted-foreground">
-                Choose your service tier and complete the submission form
-              </p>
-            </div>
+                <div className="mb-12 text-center">
+                  <h1 className="text-4xl font-bold mb-4">Submit Cards for Grading</h1>
+                  <p className="text-lg text-muted-foreground">
+                    Choose your service tier and complete the submission form
+                  </p>
+                </div>
 
-            <div className="grid lg:grid-cols-3 gap-6 mb-6">
+                <div className="grid lg:grid-cols-3 gap-6 mb-6">
               {tiers.map((tier) => {
                 const Icon = tier.icon;
                 const isSelected = selectedTier === tier.id;
@@ -224,11 +224,11 @@ const Submit = () => {
                     </RadioGroup>
                   </Card>
                 );
-              })}
-            </div>
+                  })}
+                </div>
 
-            {/* Diamond tier row (full-width) */}
-            <div className="mb-12">
+                {/* Diamond tier row (full-width) */}
+                <div className="mb-12">
               <Card
                 className={`p-6 cursor-pointer transition-all relative diamond-card ${
                   selectedTier === diamondTier.id ? "ring-2 ring-accent shadow-premium" : "shadow-card hover:shadow-card-hover"
@@ -278,10 +278,10 @@ const Submit = () => {
                     </RadioGroup>
                   </div>
                 </div>
-              </Card>
-            </div>
+                  </Card>
+                </div>
 
-            <Card className="p-8 shadow-card">
+                <Card className="p-8 shadow-card">
               <h2 className="text-2xl font-bold mb-6">Submission Details</h2>
               
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -382,9 +382,9 @@ const Submit = () => {
                 <Button type="submit" variant="premium" size="lg" className="w-full premium-button">
                   Proceed to Payment - £{getTotalCost().toFixed(2)}
                 </Button>
-              </form>
-            </Card>
-            
+                  </form>
+                </Card>
+              </>
             )}
           </div>
         </div>

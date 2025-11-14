@@ -61,25 +61,25 @@ const Navigation = () => {
   }, [open]);
 
   return (
-  <nav className="fixed top-0 left-0 right-0 z-50 nav-blur">
+  <nav className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border/50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo on the left */}
-          <Link to="/" className="flex items-center">
-            <img src={nazLogo} alt="NAZ TCG - National Authentication Zone" className="h-10 w-auto" />
-          </Link>
-
-          {/* Hamburger menu (mobile only) */}
+          {/* Hamburger menu (mobile only) - moved to left */}
           <div className="flex items-center md:hidden">
             <button
               aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}
               onClick={() => setOpen((v) => !v)}
-              className="p-2 rounded-md hover:bg-primary/10 transition-colors"
+              className="p-2 rounded-md bg-card/80 hover:bg-card transition-colors border border-border/30"
             >
               {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
+
+          {/* Logo - desktop left, mobile center */}
+          <Link to="/" className="flex items-center md:flex-none absolute left-1/2 transform -translate-x-1/2 md:relative md:left-auto md:transform-none">
+            <img src={nazLogo} alt="NAZ TCG - National Authentication Zone" className="h-10 w-auto" />
+          </Link>
           
           {/* Desktop navigation menu */}
           <div className="hidden md:flex items-center gap-8">
@@ -141,7 +141,7 @@ const Navigation = () => {
 
       {/* Slide-out panel (from the left) */}
       <aside
-        className={`fixed top-0 left-0 h-full w-[85%] max-w-xs bg-white z-50 shadow-lg transform transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed top-0 left-0 h-full w-[85%] max-w-xs bg-card border-r border-border z-50 shadow-lg transform transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`}
         aria-hidden={!open}
         role="dialog"
         aria-modal={open}

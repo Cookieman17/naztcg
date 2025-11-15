@@ -1,28 +1,51 @@
 const ScrollingBanner = () => {
   const messages = [
-    "NAZ TCG • Professional Card Authentication",
-    "Expert Grading • Trusted by Collectors Worldwide", 
-    "Fast Turnaround • Secure Processing",
-    "Industry Standards • Certified Authentication",
-    "Premium Quality • Reliable Results"
+    { text: "NAZ TCG", style: "filled" },
+    { text: "AUTHENTICATE CARDS", style: "outlined" }, 
+    { text: "PROFESSIONAL GRADING", style: "filled" },
+    { text: "TRUSTED RESULTS", style: "outlined" },
+    { text: "EXPERT AUTHENTICATION", style: "filled" }, 
+    { text: "QUALITY ASSURANCE", style: "outlined" }
   ];
 
   return (
-    <div className="bg-accent overflow-hidden py-3 relative">
+    <div className="bg-accent overflow-hidden py-6 relative">
       <div className="flex animate-scroll whitespace-nowrap">
         {/* First set of messages */}
-        <div className="flex space-x-8 text-accent-foreground font-semibold text-lg">
+        <div className="flex items-center" style={{ gap: '30px', paddingLeft: '30px', paddingRight: '30px' }}>
           {messages.map((message, index) => (
-            <span key={`first-${index}`} className="px-4">
-              {message}
+            <span 
+              key={`first-${index}`} 
+              className={`text-5xl font-black tracking-wider ${
+                message.style === 'filled' 
+                  ? 'text-white' 
+                  : 'text-transparent'
+              }`}
+              style={message.style === 'outlined' ? {
+                WebkitTextStroke: '2px white',
+                textStroke: '2px white'
+              } : {}}
+            >
+              {message.text}
             </span>
           ))}
         </div>
         {/* Duplicate set for seamless loop */}
-        <div className="flex space-x-8 text-accent-foreground font-semibold text-lg">
+        <div className="flex items-center" style={{ gap: '30px', paddingLeft: '30px', paddingRight: '30px' }}>
           {messages.map((message, index) => (
-            <span key={`second-${index}`} className="px-4">
-              {message}
+            <span 
+              key={`second-${index}`} 
+              className={`text-5xl font-black tracking-wider ${
+                message.style === 'filled' 
+                  ? 'text-white' 
+                  : 'text-transparent'
+              }`}
+              style={message.style === 'outlined' ? {
+                WebkitTextStroke: '2px white',
+                textStroke: '2px white'
+              } : {}}
+            >
+              {message.text}
             </span>
           ))}
         </div>

@@ -371,7 +371,9 @@ const Submit = () => {
                             <span className="text-3xl font-bold text-accent">£{perCard.toLocaleString()}</span>
                             <span className="text-muted-foreground">per card</span>
                           </div>
-                          <p className="text-sm text-muted-foreground mt-2">Estimated order total: <strong>£{total.toLocaleString()}</strong></p>
+                          <div className="mt-3 p-3 bg-accent/10 rounded-lg">
+                            <p className="text-lg font-semibold">Total for {cardCount} card{cardCount !== 1 ? 's' : ''}: <span className="text-accent">£{total.toLocaleString()}</span></p>
+                          </div>
                         </>
                       );
                     })()

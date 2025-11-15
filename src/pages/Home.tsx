@@ -1,4 +1,3 @@
-import Navigation from "@/components/Navigation";
 import Hero from "@/components/home/Hero";
 import ScrollingBanner from "@/components/home/ScrollingBanner";
 import HeroSlideshow from "@/components/home/HeroSlideshow";
@@ -12,7 +11,6 @@ import Footer from "@/components/home/Footer";
 const Home = () => {
   return (
     <div className="min-h-screen">
-      <Navigation />
       <Hero />
       <ScrollingBanner />
       <HeroSlideshow />

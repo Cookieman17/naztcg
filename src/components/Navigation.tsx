@@ -92,6 +92,14 @@ const Navigation = () => {
               Home
             </Link>
             <Link 
+              to="/about" 
+              className={`text-sm font-medium transition-colors hover:text-primary ${
+                isActive("/about") ? "text-primary font-semibold" : "text-foreground/70"
+              }`}
+            >
+              About
+            </Link>
+            <Link 
               to="/shop" 
               className={`text-sm font-medium transition-colors hover:text-primary ${
                 isActive("/shop") ? "text-primary font-semibold" : "text-foreground/70"
@@ -157,17 +165,18 @@ const Navigation = () => {
 
         <nav className="p-4 space-y-4">
           <Link style={{ ['--i' as any]: 0 }} onClick={() => setOpen(false)} to="/" className="menu-item block text-lg font-medium">Home</Link>
-          <Link style={{ ['--i' as any]: 1 }} onClick={() => setOpen(false)} to="/shop" className="menu-item block text-lg font-medium">Shop</Link>
-          <Link style={{ ['--i' as any]: 2 }} onClick={() => setOpen(false)} to="/submit" className="menu-item block text-lg font-medium">Submit for Grading</Link>
-          <Link style={{ ['--i' as any]: 3 }} onClick={() => setOpen(false)} to="/verify" className="menu-item block text-lg font-medium">Verify Card</Link>
+          <Link style={{ ['--i' as any]: 1 }} onClick={() => setOpen(false)} to="/about" className="menu-item block text-lg font-medium">About</Link>
+          <Link style={{ ['--i' as any]: 2 }} onClick={() => setOpen(false)} to="/shop" className="menu-item block text-lg font-medium">Shop</Link>
+          <Link style={{ ['--i' as any]: 3 }} onClick={() => setOpen(false)} to="/submit" className="menu-item block text-lg font-medium">Submit for Grading</Link>
+          <Link style={{ ['--i' as any]: 4 }} onClick={() => setOpen(false)} to="/verify" className="menu-item block text-lg font-medium">Verify Card</Link>
 
-          <div className="mt-4 menu-item" style={{ ['--i' as any]: 4 }}>
+          <div className="mt-4 menu-item" style={{ ['--i' as any]: 5 }}>
             <Link to="/submit" onClick={() => setOpen(false)}>
               <Button variant="premium" size="sm">Get Started</Button>
             </Link>
           </div>
 
-          <div className="mt-6 border-t border-border pt-4 menu-item" style={{ ['--i' as any]: 5 }}>
+          <div className="mt-6 border-t border-border pt-4 menu-item" style={{ ['--i' as any]: 6 }}>
             <Link onClick={() => setOpen(false)} to="/cart" className="flex items-center gap-3">
               <ShoppingCart className="w-5 h-5" />
               <span>Cart</span>

@@ -1,10 +1,8 @@
-import Navigation from "@/components/Navigation";
 import Footer from "@/components/home/Footer";
 
 const About = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <Navigation />
       <main className="flex-grow pt-24 pb-12">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">

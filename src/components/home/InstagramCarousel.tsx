@@ -17,11 +17,18 @@ interface InstagramPost {
 const INSTAGRAM_ACCESS_TOKEN = import.meta.env.VITE_INSTAGRAM_ACCESS_TOKEN;
 const INSTAGRAM_USER_ID = import.meta.env.VITE_INSTAGRAM_USER_ID;
 
+// Import images properly for production
+import slide1 from '@/assets/Slideshow/slide 1 .jpg';
+import slide2 from '@/assets/Slideshow/slide 2 .jpg';
+import slide3 from '@/assets/Slideshow/slide 3 .jpg';
+import slide4 from '@/assets/Slideshow/slide 4 .jpg';
+import slide5 from '@/assets/Slideshow/slide 5 .jpg';
+
 // Fallback mock data for development/demo
 const fallbackPosts: InstagramPost[] = [
   {
     id: '1',
-    media_url: '/src/assets/Slideshow/slide 1 .jpg',
+    media_url: slide1,
     media_type: 'IMAGE',
     caption: 'Fresh card grading showcase! Professional grading services for your premium cards. 🔥 #CardGrading #PSA #NAZGrading',
     like_count: 247,
@@ -31,7 +38,7 @@ const fallbackPosts: InstagramPost[] = [
   },
   {
     id: '2',
-    media_url: '/src/assets/Slideshow/slide 2 .jpg',
+    media_url: slide2,
     media_type: 'IMAGE',
     caption: 'Behind the scenes at our grading facility. Each card receives premium treatment! ✨ #BehindTheScenes #Quality',
     like_count: 189,
@@ -41,7 +48,7 @@ const fallbackPosts: InstagramPost[] = [
   },
   {
     id: '3',
-    media_url: '/src/assets/Slideshow/slide 3 .jpg',
+    media_url: slide3,
     media_type: 'IMAGE',
     caption: 'Customer submission showcase! Amazing collection going through our Express service 🚀 #CustomerShowcase #Express',
     like_count: 312,
@@ -51,7 +58,7 @@ const fallbackPosts: InstagramPost[] = [
   },
   {
     id: '4',
-    media_url: '/src/assets/Slideshow/slide 4 .jpg',
+    media_url: slide4,
     media_type: 'IMAGE',
     caption: 'Perfect 10s all around! Our Diamond Sleeve protection ensures pristine condition 💎 #Perfect10 #DiamondSleeve',
     like_count: 425,
@@ -61,7 +68,7 @@ const fallbackPosts: InstagramPost[] = [
   },
   {
     id: '5',
-    media_url: '/src/assets/Slideshow/slide 5 .jpg',
+    media_url: slide5,
     media_type: 'IMAGE',
     caption: 'Vintage classics getting royal treatment! Standard service with premium care 👑 #VintageCards #Standards',
     like_count: 156,
@@ -71,28 +78,11 @@ const fallbackPosts: InstagramPost[] = [
   }
 ];
 
-// Function to fetch real Instagram posts
+// Function to fetch real Instagram posts - disabled for production stability
 const fetchInstagramPosts = async (): Promise<InstagramPost[]> => {
-  if (!INSTAGRAM_ACCESS_TOKEN || !INSTAGRAM_USER_ID) {
-    console.warn('Instagram API credentials not found, using fallback data');
-    return fallbackPosts;
-  }
-
-  try {
-    const response = await fetch(
-      `https://graph.instagram.com/${INSTAGRAM_USER_ID}/media?fields=id,media_url,media_type,caption,like_count,comments_count,timestamp,permalink&access_token=${INSTAGRAM_ACCESS_TOKEN}&limit=10`
-    );
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch Instagram posts');
-    }
-    
-    const data = await response.json();
-    return data.data || fallbackPosts;
-  } catch (error) {
-    console.error('Error fetching Instagram posts:', error);
-    return fallbackPosts;
-  }
+  // Always use fallback data for now to prevent API issues
+  console.log('Using fallback Instagram posts for stability');
+  return fallbackPosts;
 };
 
 const InstagramCarousel: React.FC = () => {
@@ -256,9 +246,7 @@ const InstagramCarousel: React.FC = () => {
                         src={post.media_url}
                         alt={post.caption ? post.caption.substring(0, 100) + '...' : 'Instagram post'}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 pointer-events-none"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
+
                       />
                       
                       {/* Hover Overlay */}
@@ -328,9 +316,7 @@ const InstagramCarousel: React.FC = () => {
                 src={selectedPost.media_url}
                 alt={selectedPost.caption ? selectedPost.caption.substring(0, 100) + '...' : 'Instagram post'}
                 className="max-w-full max-h-full object-contain"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
+
               />
             </div>
             

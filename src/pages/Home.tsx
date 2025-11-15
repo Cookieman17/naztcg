@@ -1,6 +1,7 @@
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/home/Hero";
 import HeroSlideshow from "@/components/home/HeroSlideshow";
+import ScrollingBanner from "@/components/home/ScrollingBanner";
 import WhatIsGrading from "@/components/home/WhatIsGrading";
 import HowItWorks from "@/components/home/HowItWorks";
 import WhyChooseUs from "@/components/home/WhyChooseUs";
@@ -12,6 +13,7 @@ const Home = () => {
     <div className="min-h-screen">
       <Navigation />
       <Hero />
+      <ScrollingBanner />
       <HeroSlideshow />
       <WhatIsGrading />
       <HowItWorks />

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,19 +13,23 @@ interface StripePaymentButtonProps {
   description: string;
   buttonText?: string;
   className?: string;
+  orderData?: any; // Additional order data to pass to confirmation page
 }
 
 const StripePaymentButton = ({ 
   amount, 
   description, 
   buttonText = "Pay Now",
-  className = ""
+  className = "",
+  orderData = {}
 }: StripePaymentButtonProps) => {
   const stripe = useStripe();
   const elements = useElements();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [customerEmail, setCustomerEmail] = useState('');
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -67,8 +72,18 @@ const StripePaymentButton = ({
       // Close the dialog on success
       setIsOpen(false);
       
-      // You could show a success message here
-      alert('Payment successful! (Demo mode)');
+      // Generate order ID and redirect to confirmation page
+      const orderId = `NAZ-${Date.now()}`;
+      const confirmationParams = new URLSearchParams({
+        orderId,
+        amount: amount.toString(),
+        service: orderData.service || description,
+        cardCount: orderData.cardCount?.toString() || '1',
+        email: customerEmail,
+        diamondSleeve: orderData.diamondSleeve?.toString() || 'false'
+      });
+      
+      navigate(`/order-confirmation?${confirmationParams.toString()}`);
       
     } catch (err) {
       setError('An unexpected error occurred');
@@ -119,7 +134,9 @@ const StripePaymentButton = ({
                 <Input 
                   id="email" 
                   type="email" 
-                  placeholder="your@email.com" 
+                  placeholder="your@email.com"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
                   required 
                 />
               </div>

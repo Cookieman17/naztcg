@@ -302,6 +302,15 @@ const Submit = () => {
                   const totalAmount = perCardPrice * (cardCount || 0);
                   const amountInCents = Math.round(totalAmount * 100); // Convert to cents for Stripe
                   
+                  const orderData = {
+                    service: selectedTierData?.name || 'Card Grading',
+                    cardCount: cardCount,
+                    diamondSleeve: diamondSleeve,
+                    tierPrice: tierPrice,
+                    perCardPrice: perCardPrice,
+                    totalAmount: totalAmount
+                  };
+                  
                   return (
                     <div className="space-y-4">
                       <StripePaymentButton 
@@ -309,6 +318,7 @@ const Submit = () => {
                         description={`${selectedTierData?.name || 'Card Grading'} - ${cardCount} card${cardCount !== 1 ? 's' : ''}${diamondSleeve ? ' with Diamond Sleeve' : ''}`}
                         buttonText={`Pay £${totalAmount.toFixed(2)} - Complete Order`}
                         className="w-full text-lg px-8 py-6 h-auto bg-accent hover:bg-accent/90"
+                        orderData={orderData}
                       />
                       <Button type="submit" variant="outline" size="lg" className="w-full">
                         Submit Without Payment (Pay Later)

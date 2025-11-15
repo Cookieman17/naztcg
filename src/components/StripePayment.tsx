@@ -12,8 +12,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, CreditCard, Shield, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-// Initialize Stripe (Replace with your publishable key)
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_...');
+// Initialize Stripe with fallback for demo
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
 interface PaymentFormProps {
   amount: number;
@@ -57,6 +57,13 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     event.preventDefault();
 
     if (!stripe || !elements) {
+      setPaymentError('Payment system not properly configured. Please contact support.');
+      return;
+    }
+
+    // Check if Stripe key is configured
+    if (!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY) {
+      setPaymentError('Payment system is currently unavailable. Please contact support.');
       return;
     }
 
@@ -72,8 +79,11 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     }
 
     try {
+      // Check if payment server is available
+      const serverUrl = import.meta.env.VITE_PAYMENT_SERVER_URL || 'http://localhost:3001';
+      
       // Create payment intent on your server
-      const response = await fetch('http://localhost:3001/create-payment-intent', {
+      const response = await fetch(`${serverUrl}/create-payment-intent`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,6 +94,10 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
           metadata
         }),
       });
+
+      if (!response.ok) {
+        throw new Error('Payment server unavailable');
+      }
 
       const { clientSecret, paymentIntentId } = await response.json();
 
@@ -109,8 +123,12 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         onSuccess(paymentIntentId);
       }
     } catch (error) {
-      setPaymentError('Failed to process payment. Please try again.');
       console.error('Payment error:', error);
+      if (error instanceof Error && error.message.includes('server')) {
+        setPaymentError('Payment processing is currently unavailable. Please contact support at support@nazgrading.com');
+      } else {
+        setPaymentError('Failed to process payment. Please try again or contact support.');
+      }
     }
 
     setIsProcessing(false);
@@ -257,6 +275,25 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
 interface StripePaymentWrapperProps extends PaymentFormProps {}
 
 const StripePaymentWrapper: React.FC<StripePaymentWrapperProps> = (props) => {
+  // If no Stripe key is configured, show a message instead of trying to load Stripe
+  if (!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY) {
+    return (
+      <Card className="p-8 text-center">
+        <CreditCard className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+        <h3 className="text-xl font-semibold mb-2">Payment System Setup Required</h3>
+        <p className="text-muted-foreground mb-4">
+          Payment processing is currently being configured. 
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Please contact us at <strong>support@nazgrading.com</strong> to complete your order.
+        </p>
+        <Button variant="outline" onClick={props.onCancel} className="mt-4">
+          Back to Form
+        </Button>
+      </Card>
+    );
+  }
+
   return (
     <Elements stripe={stripePromise}>
       <PaymentForm {...props} />

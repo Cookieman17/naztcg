@@ -1,5 +1,4 @@
 import { useState } from "react";
-import Navigation from "@/components/Navigation";
 import Footer from "@/components/home/Footer";
 import StripePayment from "@/components/StripePayment";
 import { Card } from "@/components/ui/card";
@@ -124,8 +123,6 @@ const Submit = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navigation />
-      
       <main className="flex-grow pt-24 pb-12">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">

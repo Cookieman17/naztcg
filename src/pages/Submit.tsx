@@ -11,7 +11,7 @@ import { Check, Clock, Zap, Award, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Submit = () => {
-  const { toast } = useToast();
+  const { toast } = useToast(); // Fixed navigation and Stripe issues
   const [selectedTier, setSelectedTier] = useState("standard");
   const [cardCount, setCardCount] = useState<number>(1);
   const [diamondSleeve, setDiamondSleeve] = useState<boolean>(false);

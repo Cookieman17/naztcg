@@ -8,53 +8,56 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Dark red site background */
-    --background: 355 24% 8%;   /* deep maroon */
-    --foreground: 0 0% 96%;    /* near-white text for contrast */
+    /* Clean white/light background like TAG */
+    --background: 0 0% 100%;   /* pure white */
+    --foreground: 222 84% 4.9%;    /* dark text for contrast */
 
-    /* Card / surface colors (slightly lighter than background) */
-    --card: 355 22% 12%;
-    --card-foreground: 0 0% 96%;
+    /* Card / surface colors */
+    --card: 0 0% 100%;
+    --card-foreground: 222 84% 4.9%;
 
-    --popover: 355 20% 10%;
-    --popover-foreground: 0 0% 96%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 84% 4.9%;
 
-  /* Primary/theme color (deep red) */
-  --primary: 355 78% 36%;
-  --primary-foreground: 0 0% 100%;
+    /* Primary/theme color (TAG's red) */
+    --primary: 0 72% 51%;
+    --primary-foreground: 210 40% 98%;
 
-  --secondary: 355 16% 12%;
-  --secondary-foreground: 0 0% 96%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
 
-  --muted: 355 18% 16%;
-  --muted-foreground: 0 0% 84%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
 
-  /* Accent / secondary highlight (warm red/orange) */
-  --accent: 14 95% 52%;
-  --accent-foreground: 0 0% 100%;
+    /* Accent color (TAG's bright red) */
+    --accent: 0 84% 60%;
+    --accent-foreground: 210 40% 98%;
 
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
 
-  --border: 355 18% 14%;
-  --input: 355 18% 14%;
-  /* Use primary for focus ring by default */
-  --ring: 0 78% 45%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 0 72% 51%;
 
     --radius: 0.75rem;
 
-    /* Premium gradients */
-  --gradient-hero: linear-gradient(135deg, hsl(355 62% 18%) 0%, hsl(355 56% 12%) 100%);
-  --gradient-card: linear-gradient(180deg, hsl(355 24% 12%) 0%, hsl(355 20% 10%) 100%);
-  --gradient-accent: linear-gradient(135deg, hsl(14 95% 52%) 0%, hsl(355 78% 36%) 100%);
+    /* TAG-inspired premium gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(0 72% 51%) 0%, hsl(0 84% 60%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 40% 98%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(0 84% 60%) 0%, hsl(0 72% 51%) 100%);
+    --gradient-premium: linear-gradient(135deg, hsl(0 72% 51%) 0%, hsl(14 95% 52%) 50%, hsl(0 84% 60%) 100%);
+    --gradient-transparent: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
     
-    /* Shadows */
-  --shadow-card: 0 4px 6px -1px hsl(0 0% 0% / 0.06), 0 2px 4px -1px hsl(0 0% 0% / 0.04);
-  --shadow-card-hover: 0 10px 15px -3px hsl(0 0% 0% / 0.08), 0 4px 6px -2px hsl(0 0% 0% / 0.06);
-  --shadow-premium: 0 20px 25px -5px hsl(14 95% 50% / 0.2), 0 10px 10px -5px hsl(14 95% 50% / 0.1);
+    /* Enhanced shadows inspired by TAG's premium feel */
+    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow-card-hover: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
+    --shadow-premium: 0 20px 25px -5px hsl(0 72% 51% / 0.15), 0 8px 10px -6px hsl(0 72% 51% / 0.1);
+    --shadow-glow: 0 0 20px hsl(0 84% 60% / 0.3);
 
-    /* Transitions */
+    /* Smooth transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 
   .dark {
@@ -88,56 +91,93 @@ All colors MUST be HSL.
   }
 }
 
-/* Diamond shimmer & sparkle effects for the Diamond Tier card */
-.diamond-card {
+/* TAG-inspired premium effects */
+.premium-card {
   position: relative;
   overflow: hidden;
+  background: var(--gradient-card);
+  backdrop-filter: blur(10px);
 }
 
-.diamond-shimmer {
+.crystal-shimmer {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(120deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.08) 20%, rgba(255,255,255,0.02) 40%, rgba(255,255,255,0.02) 100%);
-  mix-blend-mode: screen;
-  opacity: 0.9;
+  background: linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 20%, rgba(255,255,255,0) 40%);
   transform: translateX(-120%);
-  animation: shimmer 3.2s linear infinite;
+  animation: crystalShimmer 4s linear infinite;
 }
 
-@keyframes shimmer {
+@keyframes crystalShimmer {
   0% { transform: translateX(-120%) skewX(-15deg); }
   50% { transform: translateX(30%) skewX(-10deg); }
   100% { transform: translateX(130%) skewX(-15deg); }
 }
 
-.diamond-sparkle {
+.tag-glow {
+  position: relative;
+}
+
+.tag-glow::before {
+  content: '';
   position: absolute;
-  width: 10px;
-  height: 10px;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.6) 20%, rgba(255,255,255,0.05) 60%, rgba(255,255,255,0) 100%);
-  transform: rotate(15deg) scale(1);
+  inset: -2px;
+  padding: 2px;
+  background: var(--gradient-premium);
+  border-radius: inherit;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  -webkit-mask-composite: xor;
   opacity: 0;
-  filter: drop-shadow(0 0 6px rgba(255,255,255,0.8));
-  animation: sparkle 2.8s linear infinite;
+  transition: opacity 0.3s ease;
 }
 
-@keyframes sparkle {
-  0% { opacity: 0; transform: scale(0.6) rotate(0deg); }
-  10% { opacity: 1; transform: scale(1.15) rotate(5deg); }
-  40% { opacity: 0.6; transform: scale(0.9) rotate(-3deg); }
-  100% { opacity: 0; transform: scale(0.6) rotate(10deg); }
+.tag-glow:hover::before {
+  opacity: 1;
 }
 
-/* Slight glossy border/highlight */
-.diamond-gloss {
+/* Transparent glass effect like TAG's slabs */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Premium button effects */
+.premium-button {
+  position: relative;
+  background: var(--gradient-premium);
+  overflow: hidden;
+  transform: translateY(0);
+  transition: var(--transition-bounce);
+}
+
+.premium-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-premium);
+}
+
+.premium-button::before {
+  content: '';
   position: absolute;
-  left: -40%;
-  top: -60%;
-  width: 140%;
-  height: 140%;
-  background: radial-gradient(ellipse at 10% 10%, rgba(255,255,255,0.06), rgba(255,255,255,0) 40%);
-  pointer-events: none;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transition: left 0.6s;
+}
+
+.premium-button:hover::before {
+  left: 100%;
 }
 
 /* Menu item entrance animation for mobile slide-out */
@@ -158,6 +198,51 @@ All colors MUST be HSL.
   .diamond-shimmer, .diamond-sparkle { animation: none; }
 }
 
+/* TAG-inspired typography and layout utilities */
+.section-padding {
+  @apply py-16 md:py-24;
+}
+
+.container-narrow {
+  @apply container mx-auto px-4 max-w-6xl;
+}
+
+.heading-xl {
+  @apply text-4xl md:text-5xl lg:text-6xl font-bold leading-tight;
+}
+
+.heading-lg {
+  @apply text-3xl md:text-4xl font-bold leading-tight;
+}
+
+.text-gradient {
+  background: var(--gradient-premium);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.nav-blur {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced hover animations */
+.hover-lift {
+  transition: var(--transition-smooth);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.hover-glow:hover {
+  box-shadow: var(--shadow-glow);
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -165,34 +250,11 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
   }
-}
 
-/* Enhanced payment form styling for better visibility */
-@layer components {
-  .payment-form-container {
-    @apply bg-card border border-border rounded-lg shadow-card;
-  }
-  
-  .payment-input-field {
-    @apply bg-muted/20 border-border text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-accent/20 focus:border-accent/50 transition-all;
-  }
-  
-  .payment-success-alert {
-    @apply bg-green-500/10 border-green-500/20 text-green-400;
-  }
-  
-  .payment-error-alert {
-    @apply bg-red-500/10 border-red-500/20 text-red-400;
-  }
-  
-  /* Stripe Elements specific styling overrides */
-  .StripeElement {
-    background-color: transparent !important;
-    padding: 8px 0 !important;
-  }
-  
-  .StripeElement--focus {
-    box-shadow: none !important;
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+    letter-spacing: -0.025em;
   }
 }

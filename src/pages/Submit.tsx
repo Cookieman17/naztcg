@@ -1,14 +1,13 @@
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/home/Footer";
-import StripePayment from "@/components/StripePayment";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Check, Clock, Zap, Award, ArrowLeft } from "lucide-react";
+import { Check, Clock, Zap, Award } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Submit = () => {
@@ -16,14 +15,6 @@ const Submit = () => {
   const [selectedTier, setSelectedTier] = useState("standard");
   const [cardCount, setCardCount] = useState<number>(1);
   const [diamondSleeve, setDiamondSleeve] = useState<boolean>(false);
-  const [showPayment, setShowPayment] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "", 
-    phone: "",
-    address: "",
-    notes: ""
-  });
   const DIAMOND_SLEEVE_PRICE = 50; // per card
 
   const tiers = [
@@ -88,38 +79,10 @@ const Submit = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const form = new FormData(e.target as HTMLFormElement);
-    
-    setFormData({
-      name: form.get("name") as string,
-      email: form.get("email") as string,
-      phone: form.get("phone") as string,
-      address: form.get("address") as string,
-      notes: form.get("notes") as string || ""
-    });
-    
-    setShowPayment(true);
-  };
-
-  const handlePaymentSuccess = (paymentIntentId: string) => {
     toast({
-      title: "Order Confirmed!",
-      description: `Payment successful! Order ID: ${paymentIntentId}. Check your email for shipping instructions.`,
+      title: "Submission Received!",
+      description: "We'll send you a confirmation email with shipping instructions shortly.",
     });
-    // Here you would typically redirect to a success page or reset the form
-  };
-
-  const handlePaymentCancel = () => {
-    setShowPayment(false);
-  };
-
-  // Calculate total cost
-  const getTotalCost = () => {
-    const selectedTierData = [...tiers, diamondTier].find(t => t.id === selectedTier);
-    const tierPrice = selectedTierData?.price || 0;
-    const sleevePrice = diamondSleeve ? DIAMOND_SLEEVE_PRICE : 0;
-    const perCardCost = tierPrice + sleevePrice;
-    return perCardCost * cardCount;
   };
 
   return (
@@ -129,52 +92,14 @@ const Submit = () => {
       <main className="flex-grow pt-24 pb-12">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            
-            {/* Payment Section */}
-            {showPayment && (
-              <div className="mb-12">
-                <div className="flex items-center gap-4 mb-6">
-                  <Button 
-                    variant="outline" 
-                    onClick={handlePaymentCancel}
-                    className="flex items-center gap-2"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    Back to Form
-                  </Button>
-                  <h2 className="text-2xl font-bold">Complete Your Order</h2>
-                </div>
-                
-                <StripePayment
-                  amount={getTotalCost()}
-                  currency="gbp"
-                  metadata={{
-                    tier: selectedTier,
-                    cardCount,
-                    customerName: formData.name,
-                    customerEmail: formData.email,
-                    diamondSleeve
-                  }}
-                  onSuccess={handlePaymentSuccess}
-                  onCancel={handlePaymentCancel}
-                />
-                
-                <div className="mt-6 text-center text-sm text-muted-foreground">
-                  <p>After payment, we'll email you shipping instructions and a prepaid label.</p>
-                </div>
-              </div>
-            )}
+            <div className="mb-12 text-center">
+              <h1 className="text-4xl font-bold mb-4">Submit Cards for Grading</h1>
+              <p className="text-lg text-muted-foreground">
+                Choose your service tier and complete the submission form
+              </p>
+            </div>
 
-            {!showPayment && (
-              <>
-                <div className="mb-12 text-center">
-                  <h1 className="text-4xl font-bold mb-4">Submit Cards for Grading</h1>
-                  <p className="text-lg text-muted-foreground">
-                    Choose your service tier and complete the submission form
-                  </p>
-                </div>
-
-                <div className="grid lg:grid-cols-3 gap-6 mb-6">
+            <div className="grid lg:grid-cols-3 gap-6 mb-6">
               {tiers.map((tier) => {
                 const Icon = tier.icon;
                 const isSelected = selectedTier === tier.id;
@@ -224,11 +149,11 @@ const Submit = () => {
                     </RadioGroup>
                   </Card>
                 );
-                  })}
-                </div>
+              })}
+            </div>
 
-                {/* Diamond tier row (full-width) */}
-                <div className="mb-12">
+            {/* Diamond tier row (full-width) */}
+            <div className="mb-12">
               <Card
                 className={`p-6 cursor-pointer transition-all relative diamond-card ${
                   selectedTier === diamondTier.id ? "ring-2 ring-accent shadow-premium" : "shadow-card hover:shadow-card-hover"
@@ -278,43 +203,34 @@ const Submit = () => {
                     </RadioGroup>
                   </div>
                 </div>
-                  </Card>
-                </div>
+              </Card>
+            </div>
 
-                <Card className="p-8 shadow-card">
+            <Card className="p-8 shadow-card">
               <h2 className="text-2xl font-bold mb-6">Submission Details</h2>
               
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <Label htmlFor="name">Full Name *</Label>
-                    <Input id="name" name="name" placeholder="Ash Ketchum" required />
+                    <Input id="name" placeholder="Ash Ketchum" required />
                   </div>
                   
                   <div>
                     <Label htmlFor="email">Email Address *</Label>
-                    <Input id="email" name="email" type="email" placeholder="ash@pokemon.com" required />
+                    <Input id="email" type="email" placeholder="ash@pokemon.com" required />
                   </div>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <Label htmlFor="phone">Phone Number *</Label>
-                    <Input id="phone" name="phone" type="tel" placeholder="07700 900123" required />
+                    <Input id="phone" type="tel" placeholder="07700 900123" required />
                   </div>
                   
                     <div>
                       <Label htmlFor="cardCount">Number of Cards *</Label>
-                      <Input 
-                        id="cardCount" 
-                        name="cardCount"
-                        type="number" 
-                        min="1" 
-                        value={cardCount} 
-                        onChange={(e) => setCardCount(Number(e.target.value) || 1)} 
-                        placeholder="5" 
-                        required 
-                      />
+                      <Input id="cardCount" type="number" min="1" value={cardCount} onChange={(e) => setCardCount(Number(e.target.value) || 0)} placeholder="5" required />
                     </div>
                 </div>
 
@@ -322,7 +238,6 @@ const Submit = () => {
                   <Label htmlFor="address">Shipping Address *</Label>
                   <Textarea 
                     id="address" 
-                    name="address"
                     placeholder="1 Pallet Town Road, Kanto, London, SW1A 1AA"
                     rows={3}
                     required
@@ -333,7 +248,6 @@ const Submit = () => {
                   <Label htmlFor="notes">Special Instructions (Optional)</Label>
                   <Textarea 
                     id="notes" 
-                    name="notes"
                     placeholder="Any special handling requirements or notes about your cards..."
                     rows={4}
                   />
@@ -379,13 +293,11 @@ const Submit = () => {
                   
                 </div>
 
-                <Button type="submit" variant="premium" size="lg" className="w-full premium-button">
-                  Proceed to Payment - £{getTotalCost().toFixed(2)}
+                <Button type="submit" variant="premium" size="lg" className="w-full">
+                  Complete Submission
                 </Button>
-                  </form>
-                </Card>
-              </>
-            )}
+              </form>
+            </Card>
           </div>
         </div>
       </main>

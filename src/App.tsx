@@ -20,7 +20,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <CartProvider>
-      <BrowserRouter basename="/naztcg">
+      <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />

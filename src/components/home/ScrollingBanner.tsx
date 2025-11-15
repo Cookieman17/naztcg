@@ -9,14 +9,14 @@ const ScrollingBanner = () => {
   ];
 
   return (
-    <div className="bg-accent overflow-hidden py-8 mt-12 relative">
+    <div className="bg-accent overflow-hidden py-10 mt-20 relative">
       <div className="flex animate-scroll whitespace-nowrap">
         {/* First set of messages */}
         <div className="flex items-center" style={{ gap: '30px', paddingLeft: '30px', paddingRight: '30px' }}>
           {messages.map((message, index) => (
             <span 
               key={`first-${index}`} 
-              className={`text-6xl font-black tracking-wider ${
+              className={`text-8xl font-black tracking-wider ${
                 message.style === 'filled' 
                   ? 'text-white' 
                   : 'text-transparent'
@@ -35,7 +35,7 @@ const ScrollingBanner = () => {
           {messages.map((message, index) => (
             <span 
               key={`second-${index}`} 
-              className={`text-6xl font-black tracking-wider ${
+              className={`text-8xl font-black tracking-wider ${
                 message.style === 'filled' 
                   ? 'text-white' 
                   : 'text-transparent'

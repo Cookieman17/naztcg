@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
@@ -12,8 +12,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, CreditCard, Shield, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-// Initialize Stripe with fallback for demo
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
+// Initialize Stripe (Replace with your publishable key)
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_...');
 
 interface PaymentFormProps {
   amount: number;
@@ -43,27 +43,11 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [stripeReady, setStripeReady] = useState(false);
-
-  // Debug Stripe loading
-  React.useEffect(() => {
-    if (stripe && elements) {
-      setStripeReady(true);
-      console.log('Stripe loaded successfully');
-    }
-  }, [stripe, elements]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (!stripe || !elements) {
-      setPaymentError('Payment system not properly configured. Please contact support.');
-      return;
-    }
-
-    // Check if Stripe key is configured
-    if (!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY) {
-      setPaymentError('Payment system is currently unavailable. Please contact support.');
       return;
     }
 
@@ -79,11 +63,8 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     }
 
     try {
-      // Check if payment server is available
-      const serverUrl = import.meta.env.VITE_PAYMENT_SERVER_URL || 'http://localhost:3001';
-      
       // Create payment intent on your server
-      const response = await fetch(`${serverUrl}/create-payment-intent`, {
+      const response = await fetch('http://localhost:3001/create-payment-intent', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,10 +75,6 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
           metadata
         }),
       });
-
-      if (!response.ok) {
-        throw new Error('Payment server unavailable');
-      }
 
       const { clientSecret, paymentIntentId } = await response.json();
 
@@ -123,12 +100,8 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         onSuccess(paymentIntentId);
       }
     } catch (error) {
+      setPaymentError('Failed to process payment. Please try again.');
       console.error('Payment error:', error);
-      if (error instanceof Error && error.message.includes('server')) {
-        setPaymentError('Payment processing is currently unavailable. Please contact support at support@nazgrading.com');
-      } else {
-        setPaymentError('Failed to process payment. Please try again or contact support.');
-      }
     }
 
     setIsProcessing(false);
@@ -139,15 +112,11 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
       base: {
         fontSize: '16px',
         color: '#ffffff',
-        fontFamily: '"Inter", "system-ui", sans-serif',
-        fontSmoothing: 'antialiased',
+        backgroundColor: 'hsl(355, 18%, 16%)',
         '::placeholder': {
-          color: '#9ca3af',
+          color: '#94a3b8',
         },
         ':focus': {
-          color: '#ffffff',
-        },
-        ':hover': {
           color: '#ffffff',
         },
       },
@@ -155,12 +124,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         color: '#ef4444',
         iconColor: '#ef4444',
       },
-      complete: {
-        color: '#10b981',
-        iconColor: '#10b981',
-      },
     },
-    hidePostalCode: false,
   };
 
   if (paymentSuccess) {
@@ -178,18 +142,6 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
             <strong>Customer:</strong> {metadata.customerName}
           </p>
         </div>
-      </Card>
-    );
-  }
-
-  if (!stripe || !elements) {
-    return (
-      <Card className="p-8 text-center">
-        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-accent" />
-        <p className="text-muted-foreground">Loading payment form...</p>
-        <p className="text-xs text-muted-foreground mt-2">
-          If this takes too long, please refresh the page
-        </p>
       </Card>
     );
   }
@@ -220,14 +172,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
           <label className="block text-sm font-medium mb-3 text-foreground">
             Card Information
           </label>
-          <div className="border border-border rounded-md p-4 bg-card hover:bg-muted/10 focus-within:ring-2 focus-within:ring-accent/20 focus-within:border-accent/50 transition-all duration-200 min-h-[44px] flex items-center">
-            <div className="w-full">
-              <CardElement options={cardElementOptions} />
-            </div>
+          <div className="border border-border rounded-md p-4 bg-muted/20 focus-within:ring-2 focus-within:ring-accent/20 transition-all">
+            <CardElement options={cardElementOptions} />
           </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            Enter your card number, expiry date, and CVC
-          </p>
         </div>
 
         {paymentError && (
@@ -275,25 +222,6 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
 interface StripePaymentWrapperProps extends PaymentFormProps {}
 
 const StripePaymentWrapper: React.FC<StripePaymentWrapperProps> = (props) => {
-  // If no Stripe key is configured, show a message instead of trying to load Stripe
-  if (!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY) {
-    return (
-      <Card className="p-8 text-center">
-        <CreditCard className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-        <h3 className="text-xl font-semibold mb-2">Payment System Setup Required</h3>
-        <p className="text-muted-foreground mb-4">
-          Payment processing is currently being configured. 
-        </p>
-        <p className="text-sm text-muted-foreground">
-          Please contact us at <strong>support@nazgrading.com</strong> to complete your order.
-        </p>
-        <Button variant="outline" onClick={props.onCancel} className="mt-4">
-          Back to Form
-        </Button>
-      </Card>
-    );
-  }
-
   return (
     <Elements stripe={stripePromise}>
       <PaymentForm {...props} />

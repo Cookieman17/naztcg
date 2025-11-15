@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Navigation from "@/components/Navigation";
 import Footer from "@/components/home/Footer";
 import StripePayment from "@/components/StripePayment";
 import { Card } from "@/components/ui/card";
@@ -11,7 +12,7 @@ import { Check, Clock, Zap, Award, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Submit = () => {
-  const { toast } = useToast(); // Fixed navigation and Stripe issues
+  const { toast } = useToast();
   const [selectedTier, setSelectedTier] = useState("standard");
   const [cardCount, setCardCount] = useState<number>(1);
   const [diamondSleeve, setDiamondSleeve] = useState<boolean>(false);
@@ -123,6 +124,8 @@ const Submit = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Navigation />
+      
       <main className="flex-grow pt-24 pb-12">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
@@ -368,9 +371,7 @@ const Submit = () => {
                             <span className="text-3xl font-bold text-accent">£{perCard.toLocaleString()}</span>
                             <span className="text-muted-foreground">per card</span>
                           </div>
-                          <div className="mt-3 p-3 bg-accent/10 rounded-lg">
-                            <p className="text-lg font-semibold">Total for {cardCount} card{cardCount !== 1 ? 's' : ''}: <span className="text-accent">£{total.toLocaleString()}</span></p>
-                          </div>
+                          <p className="text-sm text-muted-foreground mt-2">Estimated order total: <strong>£{total.toLocaleString()}</strong></p>
                         </>
                       );
                     })()

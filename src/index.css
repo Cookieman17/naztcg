@@ -146,25 +146,6 @@ All colors MUST be HSL.
   to { opacity: 1; transform: translateX(0); }
 }
 
-@keyframes scroll {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-33.333%);
-  }
-}
-
-.animate-scroll {
-  animation: scroll 7.5s linear infinite;
-}
-
-.text-outline {
-  -webkit-text-stroke: 3px currentColor;
-  -webkit-text-fill-color: transparent;
-  font-weight: 900;
-}
-
 .menu-item {
   opacity: 0;
   transform: translateX(8px);
@@ -208,28 +189,10 @@ All colors MUST be HSL.
   /* Stripe Elements specific styling overrides */
   .StripeElement {
     background-color: transparent !important;
-    padding: 10px 0 !important;
-    height: 24px !important;
-    width: 100% !important;
+    padding: 8px 0 !important;
   }
   
   .StripeElement--focus {
     box-shadow: none !important;
-    outline: none !important;
-  }
-  
-  .StripeElement--webkit-autofill {
-    background-color: transparent !important;
-  }
-  
-  /* Ensure proper input field visibility */
-  .__PrivateStripeElement {
-    background-color: transparent !important;
-    color: white !important;
-  }
-  
-  .__PrivateStripeElement input {
-    background-color: transparent !important;
-    color: white !important;
   }
 }

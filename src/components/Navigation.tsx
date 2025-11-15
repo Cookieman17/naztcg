@@ -61,25 +61,25 @@ const Navigation = () => {
   }, [open]);
 
   return (
-  <nav className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border/50">
+  <nav className="fixed top-0 left-0 right-0 z-50 nav-blur">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Hamburger menu (mobile only) - moved to left */}
+          {/* Logo on the left */}
+          <Link to="/" className="flex items-center">
+            <img src={nazLogo} alt="NAZ TCG - National Authentication Zone" className="h-10 w-auto" />
+          </Link>
+
+          {/* Hamburger menu (mobile only) */}
           <div className="flex items-center md:hidden">
             <button
               aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}
               onClick={() => setOpen((v) => !v)}
-              className="p-2 rounded-md bg-card/80 hover:bg-card transition-colors border border-border/30"
+              className="p-2 rounded-md hover:bg-primary/10 transition-colors"
             >
               {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
-
-          {/* Logo - desktop left, mobile center */}
-          <Link to="/" className="flex items-center md:flex-none absolute left-1/2 transform -translate-x-1/2 md:relative md:left-auto md:transform-none">
-            <img src={nazLogo} alt="NAZ TCG - National Authentication Zone" className="h-10 w-auto" />
-          </Link>
           
           {/* Desktop navigation menu */}
           <div className="hidden md:flex items-center gap-8">
@@ -90,14 +90,6 @@ const Navigation = () => {
               }`}
             >
               Home
-            </Link>
-            <Link 
-              to="/about" 
-              className={`text-sm font-medium transition-colors hover:text-primary ${
-                isActive("/about") ? "text-primary font-semibold" : "text-foreground/70"
-              }`}
-            >
-              About
             </Link>
             <Link 
               to="/shop" 
@@ -149,7 +141,7 @@ const Navigation = () => {
 
       {/* Slide-out panel (from the left) */}
       <aside
-        className={`fixed top-0 left-0 h-full w-[85%] max-w-xs bg-card border-r border-border z-50 shadow-lg transform transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed top-0 left-0 h-full w-[85%] max-w-xs bg-white z-50 shadow-lg transform transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`}
         aria-hidden={!open}
         role="dialog"
         aria-modal={open}
@@ -165,18 +157,17 @@ const Navigation = () => {
 
         <nav className="p-4 space-y-4">
           <Link style={{ ['--i' as any]: 0 }} onClick={() => setOpen(false)} to="/" className="menu-item block text-lg font-medium">Home</Link>
-          <Link style={{ ['--i' as any]: 1 }} onClick={() => setOpen(false)} to="/about" className="menu-item block text-lg font-medium">About</Link>
-          <Link style={{ ['--i' as any]: 2 }} onClick={() => setOpen(false)} to="/shop" className="menu-item block text-lg font-medium">Shop</Link>
-          <Link style={{ ['--i' as any]: 3 }} onClick={() => setOpen(false)} to="/submit" className="menu-item block text-lg font-medium">Submit for Grading</Link>
-          <Link style={{ ['--i' as any]: 4 }} onClick={() => setOpen(false)} to="/verify" className="menu-item block text-lg font-medium">Verify Card</Link>
+          <Link style={{ ['--i' as any]: 1 }} onClick={() => setOpen(false)} to="/shop" className="menu-item block text-lg font-medium">Shop</Link>
+          <Link style={{ ['--i' as any]: 2 }} onClick={() => setOpen(false)} to="/submit" className="menu-item block text-lg font-medium">Submit for Grading</Link>
+          <Link style={{ ['--i' as any]: 3 }} onClick={() => setOpen(false)} to="/verify" className="menu-item block text-lg font-medium">Verify Card</Link>
 
-          <div className="mt-4 menu-item" style={{ ['--i' as any]: 5 }}>
+          <div className="mt-4 menu-item" style={{ ['--i' as any]: 4 }}>
             <Link to="/submit" onClick={() => setOpen(false)}>
               <Button variant="premium" size="sm">Get Started</Button>
             </Link>
           </div>
 
-          <div className="mt-6 border-t border-border pt-4 menu-item" style={{ ['--i' as any]: 6 }}>
+          <div className="mt-6 border-t border-border pt-4 menu-item" style={{ ['--i' as any]: 5 }}>
             <Link onClick={() => setOpen(false)} to="/cart" className="flex items-center gap-3">
               <ShoppingCart className="w-5 h-5" />
               <span>Cart</span>

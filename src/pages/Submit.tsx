@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Check, Clock, Zap, Award } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import StripePaymentButton from "@/components/StripePaymentButton";
 
 const Submit = () => {
   const { toast } = useToast();
@@ -275,7 +276,8 @@ const Submit = () => {
                   
                   {
                     (() => {
-                      const tierPrice = tiers.find(t => t.id === selectedTier)?.price ?? 0;
+                      const selectedTierData = [...tiers, diamondTier].find(t => t.id === selectedTier);
+                      const tierPrice = selectedTierData?.price || 0;
                       const perCard = tierPrice + (diamondSleeve ? DIAMOND_SLEEVE_PRICE : 0);
                       const total = perCard * (cardCount || 0);
                       return (
@@ -293,9 +295,27 @@ const Submit = () => {
                   
                 </div>
 
-                <Button type="submit" variant="premium" size="lg" className="w-full">
-                  Complete Submission
-                </Button>
+                {(() => {
+                  const selectedTierData = [...tiers, diamondTier].find(t => t.id === selectedTier);
+                  const tierPrice = selectedTierData?.price || 0;
+                  const perCardPrice = tierPrice + (diamondSleeve ? DIAMOND_SLEEVE_PRICE : 0);
+                  const totalAmount = perCardPrice * (cardCount || 0);
+                  const amountInCents = Math.round(totalAmount * 100); // Convert to cents for Stripe
+                  
+                  return (
+                    <div className="space-y-4">
+                      <StripePaymentButton 
+                        amount={amountInCents}
+                        description={`${selectedTierData?.name || 'Card Grading'} - ${cardCount} card${cardCount !== 1 ? 's' : ''}${diamondSleeve ? ' with Diamond Sleeve' : ''}`}
+                        buttonText={`Pay £${totalAmount.toFixed(2)} - Complete Order`}
+                        className="w-full text-lg px-8 py-6 h-auto bg-accent hover:bg-accent/90"
+                      />
+                      <Button type="submit" variant="outline" size="lg" className="w-full">
+                        Submit Without Payment (Pay Later)
+                      </Button>
+                    </div>
+                  );
+                })()}
               </form>
             </Card>
           </div>

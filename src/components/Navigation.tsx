@@ -64,13 +64,8 @@ const Navigation = () => {
   <nav className="fixed top-0 left-0 right-0 z-50 bg-[hsl(var(--primary)/1)]/95 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo on the left */}
-          <Link to="/" className="flex items-center">
-            <img src={nazLogo} alt="NAZ TCG - National Authentication Zone" className="h-10 w-auto" />
-          </Link>
-
-          {/* Hamburger menu (mobile only) */}
-          <div className="flex items-center md:hidden">
+          {/* Mobile: Hamburger on left, Logo centered */}
+          <div className="md:hidden flex items-center justify-between w-full">
             <button
               aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}
@@ -79,7 +74,19 @@ const Navigation = () => {
             >
               {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
+            
+            <Link to="/" className="flex items-center absolute left-1/2 transform -translate-x-1/2">
+              <img src={nazLogo} alt="NAZ TCG - National Authentication Zone" className="h-10 w-auto" />
+            </Link>
+            
+            {/* Spacer for balance */}
+            <div className="w-10 h-10"></div>
           </div>
+
+          {/* Desktop: Logo on left */}
+          <Link to="/" className="hidden md:flex items-center">
+            <img src={nazLogo} alt="NAZ TCG - National Authentication Zone" className="h-10 w-auto" />
+          </Link>
           
           {/* Desktop navigation menu */}
           <div className="hidden md:flex items-center gap-8">
@@ -141,12 +148,12 @@ const Navigation = () => {
 
       {/* Slide-out panel (from the left) */}
       <aside
-        className={`fixed top-0 left-0 h-full w-[85%] max-w-xs bg-white z-50 shadow-lg transform transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed top-0 left-0 h-full w-[85%] max-w-xs bg-card z-50 shadow-xl transform transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`}
         aria-hidden={!open}
         role="dialog"
         aria-modal={open}
       >
-        <div ref={panelRef} className="flex items-center justify-between p-4 border-b border-border">
+        <div ref={panelRef} className="flex items-center justify-between p-6 border-b border-border">
           <Link to="/" onClick={() => setOpen(false)} className="flex items-center">
             <img src={nazLogo} alt="NAZ" className="h-8 w-auto" />
           </Link>

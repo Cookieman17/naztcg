@@ -5,76 +5,67 @@ import { Shield, Award, Clock } from "lucide-react";
 
 const Hero = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-50 to-white">
-      {/* Background pattern similar to TAG's clean aesthetic */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{ 
-          backgroundImage: 'radial-gradient(circle at 25% 25%, hsl(0 72% 51%) 0%, transparent 50%), radial-gradient(circle at 75% 75%, hsl(0 84% 60%) 0%, transparent 50%)',
-          backgroundSize: '100px 100px'
-        }} />
-      </div>
+    <section className="overflow-hidden">
+      {/* Full-bleed hero image */}
+      <div className="w-full h-64 md:h-96 bg-cover bg-center" style={{ backgroundImage: `url(${heroImage})` }} aria-hidden />
 
-      <div className="container-narrow relative z-10 text-center">
-        <div className="max-w-5xl mx-auto">
-          {/* Badge similar to TAG's style */}
-          <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-8 backdrop-blur-sm border border-primary/20">
-            <Shield className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Professional Card Authentication & Grading</span>
-          </div>
+      {/* Content container overlaps the image slightly */}
+      <div className="container mx-auto px-4 -mt-20 md:-mt-28 relative z-10">
+        <div className="max-w-6xl mx-auto flex items-center">
+          {/* Left spacer to push content to the right */}
+          <div className="hidden md:block md:w-[35%]" />
+          <div className="w-full md:w-[65%] text-right text-primary-foreground bg-transparent">
+            <section className="mb-8">
+              <div className="inline-flex items-center gap-2 bg-accent/20 px-4 py-2 rounded-full mb-6 backdrop-blur-sm">
+                <Shield className="w-4 h-4 text-accent" />
+                <span className="text-sm font-medium text-accent">Professional Card Authentication</span>
+              </div>
 
-          {/* Main heading with TAG-inspired typography */}
-          <h1 className="heading-xl mb-8 text-gradient max-w-4xl mx-auto">
-            Understand Every Grade.<br />
-            <span className="text-foreground">Completely Transparent.</span>
-          </h1>
+              <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+                Authenticate Your Pokémon Cards with Confidence
+              </h1>
 
-          <p className="text-xl md:text-2xl mb-12 text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Revolutionary grading technology that brings transparency and precision to card authentication. 
-            Join the future of collectible card grading with crystal-clear results.
-          </p>
+              <p className="text-xl md:text-2xl mb-8 text-primary-foreground/90 max-w-2xl mx-auto">
+                Industry-leading grading services backed by expertise, precision, and trust. Join thousands of collectors worldwide.
+              </p>
+            </section>
 
-          {/* CTA buttons with TAG styling */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Link to="/submit">
-              <Button variant="premium" size="lg" className="premium-button hover-glow text-lg px-10 py-4 h-auto min-w-[200px]">
-                Submit Now
-              </Button>
-            </Link>
-            <Link to="/shop">
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="text-lg px-10 py-4 h-auto min-w-[200px] hover-lift"
-              >
-                Browse Graded Cards
-              </Button>
-            </Link>
-          </div>
+            <section className="mb-12 flex flex-col sm:flex-row gap-4 justify-end">
+              <Link to="/submit">
+                <Button variant="hero" size="lg" className="text-lg px-8 py-6 h-auto">
+                  Submit Your Cards
+                </Button>
+              </Link>
+              <Link to="/shop">
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="text-lg px-8 py-6 h-auto bg-primary-foreground/10 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20"
+                >
+                  Browse Graded Cards
+                </Button>
+              </Link>
+            </section>
 
-          {/* Feature cards with glass effect */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
-            <div className="glass-card rounded-xl p-8 hover-lift tag-glow">
-              <Shield className="w-12 h-12 text-primary mb-4 mx-auto" />
-              <h3 className="font-semibold text-xl mb-3">Certified Authentication</h3>
-              <p className="text-muted-foreground">Advanced technology ensures every grade is accurate, consistent, and trustworthy.</p>
-            </div>
-            <div className="glass-card rounded-xl p-8 hover-lift tag-glow">
-              <Award className="w-12 h-12 text-primary mb-4 mx-auto" />
-              <h3 className="font-semibold text-xl mb-3">Industry Standards</h3>
-              <p className="text-muted-foreground">1-10 grading scale with precise scoring and detailed digital reports.</p>
-            </div>
-            <div className="glass-card rounded-xl p-8 hover-lift tag-glow">
-              <Clock className="w-12 h-12 text-primary mb-4 mx-auto" />
-              <h3 className="font-semibold text-xl mb-3">Crystal Clear Results</h3>
-              <p className="text-muted-foreground">Transparent encapsulation with grade inscribed directly on the slab.</p>
-            </div>
+            <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4 justify-items-end">
+              <div className="bg-primary-foreground/10 backdrop-blur-sm rounded-lg p-6 border border-primary-foreground/20 text-right">
+                <Shield className="w-10 h-10 text-accent mb-3 mx-auto" />
+                <h3 className="font-semibold text-lg mb-2">Certified Authentication</h3>
+                <p className="text-sm text-primary-foreground/80">Expert graders with years of experience</p>
+              </div>
+              <div className="bg-primary-foreground/10 backdrop-blur-sm rounded-lg p-6 border border-primary-foreground/20 text-right">
+                <Award className="w-10 h-10 text-accent mb-3 mx-auto" />
+                <h3 className="font-semibold text-lg mb-2">Trusted Standards</h3>
+                <p className="text-sm text-primary-foreground/80">Industry-recognized grading system</p>
+              </div>
+              <div className="bg-primary-foreground/10 backdrop-blur-sm rounded-lg p-6 border border-primary-foreground/20 text-right">
+                <Clock className="w-10 h-10 text-accent mb-3 mx-auto" />
+                <h3 className="font-semibold text-lg mb-2">Fast Turnaround</h3>
+                <p className="text-sm text-primary-foreground/80">Quick processing without compromising quality</p>
+              </div>
+            </section>
           </div>
         </div>
-      </div>
-
-      {/* Floating logo similar to TAG's hero */}
-      <div className="absolute top-20 right-8 opacity-20 hidden lg:block">
-        <img src={heroImage} alt="" className="w-32 h-32 rounded-full object-cover" />
       </div>
     </section>
   );

@@ -61,7 +61,7 @@ const Navigation = () => {
   }, [open]);
 
   return (
-  <nav className="fixed top-0 left-0 right-0 z-50 nav-blur">
+  <nav className="fixed top-0 left-0 right-0 z-50 bg-[hsl(var(--primary)/1)]/95 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo on the left */}
@@ -75,7 +75,7 @@ const Navigation = () => {
               aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}
               onClick={() => setOpen((v) => !v)}
-              className="p-2 rounded-md hover:bg-primary/10 transition-colors"
+              className="p-2 rounded-md hover:bg-white/10 text-white"
             >
               {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -86,7 +86,7 @@ const Navigation = () => {
             <Link 
               to="/" 
               className={`text-sm font-medium transition-colors hover:text-primary ${
-                isActive("/") ? "text-primary font-semibold" : "text-foreground/70"
+                isActive("/") ? "text-primary" : "text-muted-foreground"
               }`}
             >
               Home
@@ -94,7 +94,7 @@ const Navigation = () => {
             <Link 
               to="/shop" 
               className={`text-sm font-medium transition-colors hover:text-primary ${
-                isActive("/shop") ? "text-primary font-semibold" : "text-foreground/70"
+                isActive("/shop") ? "text-primary" : "text-muted-foreground"
               }`}
             >
               Shop
@@ -102,27 +102,27 @@ const Navigation = () => {
             <Link 
               to="/submit" 
               className={`text-sm font-medium transition-colors hover:text-primary ${
-                isActive("/submit") ? "text-primary font-semibold" : "text-foreground/70"
+                isActive("/submit") ? "text-primary" : "text-muted-foreground"
               }`}
             >
-              Submit
+              Submit for Grading
             </Link>
             <Link 
               to="/verify" 
               className={`text-sm font-medium transition-colors hover:text-primary ${
-                isActive("/verify") ? "text-primary font-semibold" : "text-foreground/70"
+                isActive("/verify") ? "text-primary" : "text-muted-foreground"
               }`}
             >
-              Verify
+              Verify Card
             </Link>
             <Link to="/submit">
-              <Button variant="premium" size="sm" className="premium-button hover-glow">Submit Now</Button>
+              <Button variant="premium" size="sm">Get Started</Button>
             </Link>
 
-            <Link to="/cart" className="relative hover:text-primary transition-colors">
+            <Link to="/cart" className="relative">
               <ShoppingCart className="w-5 h-5" />
               {totalItems > 0 && (
-                <span className="absolute -top-2 -right-3 bg-primary text-primary-foreground text-xs font-semibold rounded-full px-2 shadow-md">{totalItems}</span>
+                <span className="absolute -top-2 -right-3 bg-destructive text-destructive-foreground text-xs font-semibold rounded-full px-2">{totalItems}</span>
               )}
             </Link>
           </div>

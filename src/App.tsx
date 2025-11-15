@@ -11,6 +11,7 @@ import { CartProvider } from "@/context/CartContext";
 import Submit from "./pages/Submit";
 import Verify from "./pages/Verify";
 import NotFound from "./pages/NotFound";
+import StripeProvider from "@/components/StripeProvider";
 
 const queryClient = new QueryClient();
 
@@ -19,20 +20,22 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <CartProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/product/:id" element={<Product />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/submit" element={<Submit />} />
-          <Route path="/verify" element={<Verify />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-      </CartProvider>
+      <StripeProvider>
+        <CartProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/product/:id" element={<Product />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/submit" element={<Submit />} />
+            <Route path="/verify" element={<Verify />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+        </CartProvider>
+      </StripeProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

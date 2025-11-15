@@ -4,20 +4,12 @@
   <meta charset="utf-8">
   <title>NAZ Grading - Professional Pokémon Card Authentication</title>
   <script type="text/javascript">
-    // Single Page Apps for GitHub Pages
-    // https://github.com/rafgraph/spa-github-pages
-    // Copyright (c) 2016 Rafael Pedicini, licensed under the MIT License
-    var segmentCount = 1;
-    var l = window.location;
-    l.replace(
-      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-      l.pathname.split('/').slice(0, 1 + segmentCount).join('/') + '/?/' +
-      l.pathname.slice(1).split('/').slice(segmentCount).join('/').replace(/&/g, '~and~') +
-      (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-      l.hash
-    );
+    // Store the current path and redirect to index
+    sessionStorage.redirect = location.href;
+    location.replace(location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/naztcg');
   </script>
 </head>
 <body>
+  <p>Redirecting...</p>
 </body>
 </html>

@@ -178,6 +178,9 @@ const AdminProducts = () => {
     setProducts(updatedProducts);
     localStorage.setItem("adminProducts", JSON.stringify(updatedProducts));
     
+    // Notify shop page of product updates
+    window.dispatchEvent(new CustomEvent('productsUpdated'));
+    
     resetForm();
     setIsDialogOpen(false);
   };
@@ -204,6 +207,9 @@ const AdminProducts = () => {
       const updatedProducts = products.filter(p => p.id !== productId);
       setProducts(updatedProducts);
       localStorage.setItem("adminProducts", JSON.stringify(updatedProducts));
+      
+      // Notify shop page of product updates
+      window.dispatchEvent(new CustomEvent('productsUpdated'));
     }
   };
 

@@ -101,7 +101,7 @@ export const initializeSampleData = () => {
   if (!localStorage.getItem('adminProducts')) {
     const sampleProducts = [
       {
-        id: '1',
+        id: Date.now().toString(),
         name: 'PSA Card Grading Service',
         description: 'Professional card grading and authentication service',
         price: 25.00,
@@ -115,7 +115,7 @@ export const initializeSampleData = () => {
         updatedAt: new Date().toISOString()
       },
       {
-        id: '2', 
+        id: (Date.now() + 1).toString(),
         name: 'BGS Card Grading Service',
         description: 'Beckett Grading Services authentication',
         price: 30.00,
@@ -129,21 +129,7 @@ export const initializeSampleData = () => {
         updatedAt: new Date().toISOString()
       },
       {
-        id: '3',
-        name: 'Charizard Base Set',
-        description: 'Iconic Charizard from the original Base Set',
-        price: 350.00,
-        category: 'Trading Cards',
-        series: 'Base Set',
-        rarity: 'Rare Holo',
-        stock: 5,
-        image: '/api/placeholder/300/200',
-        status: 'active',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: '4',
+        id: (Date.now() + 2).toString(),
         name: 'Card Sleeves (100 pack)',
         description: 'Premium card protection sleeves',
         price: 12.99,

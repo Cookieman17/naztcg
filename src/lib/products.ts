@@ -1,5 +1,5 @@
 export type Product = {
-  id: number;
+  id: string;
   name: string;
   set: string;
   grade: number | null;
@@ -7,41 +7,52 @@ export type Product = {
   image: string;
   serialNumber: string | null;
   description?: string;
+  series: string;
+  rarity: string;
+  category: string;
+  stock: number;
+  status: 'active' | 'inactive';
 };
 
-export const products: Product[] = [
-  {
-    id: 1,
-    name: "Charizard Base Set Holo",
-    set: "Base Set",
-    grade: 10,
-    price: 12500,
-    image: "/placeholder.svg",
-    serialNumber: "NAZ-2024-001234",
-    description: "A classic Charizard from the Base Set. High demand collectible.",
-  },
-  {
-    id: 2,
-    name: "Pikachu VMAX Rainbow",
-    set: "Vivid Voltage",
-    grade: 9.5,
-    price: 850,
-    image: "/placeholder.svg",
-    serialNumber: "NAZ-2024-001235",
-    description: "Rare Pikachu VMAX Rainbow with vibrant foil and excellent centering.",
-  },
-  {
-    id: 3,
-    name: "Blastoise Base Set Holo",
-    set: "Base Set",
-    grade: 9,
-    price: 3200,
-    image: "/placeholder.svg",
-    serialNumber: "NAZ-2024-001236",
-    description: "Blastoise classic holo, a collector favourite.",
-  },
-];
+// Get products from localStorage (admin products that are trading cards and active)
+export function getProducts(): Product[] {
+  try {
+    const adminProducts = JSON.parse(localStorage.getItem('adminProducts') || '[]');
+    return adminProducts
+      .filter((product: any) => 
+        product.category === 'Trading Cards' && 
+        product.status === 'active' &&
+        product.stock > 0
+      )
+      .map((product: any) => ({
+        id: product.id,
+        name: product.name,
+        set: product.series || 'Unknown Set',
+        grade: null, // Will be set when graded
+        price: product.price,
+        image: product.image || '/placeholder.svg',
+        serialNumber: null, // Generated when graded
+        description: product.description,
+        series: product.series,
+        rarity: product.rarity,
+        category: product.category,
+        stock: product.stock,
+        status: product.status
+      }));
+  } catch (error) {
+    console.error('Error loading products:', error);
+    return [];
+  }
+}
 
-export function getProductById(id: number) {
+export const products = getProducts();
+
+export function getProductById(id: string): Product | null {
+  const products = getProducts();
   return products.find((p) => p.id === id) ?? null;
+}
+
+// Real-time product updates
+export function refreshProducts() {
+  window.dispatchEvent(new CustomEvent('productsUpdated'));
 }

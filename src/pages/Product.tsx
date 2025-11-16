@@ -8,7 +8,7 @@ import { useCart } from "@/context/CartContext";
 
 const Product = () => {
   const params = useParams();
-  const id = Number(params.id);
+  const id = params.id as string;
   const product = getProductById(id);
 
   const { addToCart } = useCart();

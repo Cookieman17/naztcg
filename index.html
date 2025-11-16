@@ -20,8 +20,16 @@
   <body>
     <div id="root"></div>
     
-    <!-- Simple GitHub Pages routing -->
-    <!-- Force rebuild: 2025-11-15 v2 -->
+    <!-- GitHub Pages SPA routing fix -->
+    <script>
+      (function(l) {
+        if (sessionStorage.redirect) {
+          var redirect = sessionStorage.redirect;
+          delete sessionStorage.redirect;
+          l.replace(redirect);
+        }
+      }(window.location))
+    </script>
     
     <script type="module" src="/src/main.tsx"></script>
   </body>

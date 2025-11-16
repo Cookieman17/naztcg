@@ -1,30 +1,40 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useLocation } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/home/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Package, Clock, Mail, Download, ArrowRight } from "lucide-react";
+import { CheckCircle, Package, Clock, Mail, Download, ArrowRight, ShoppingBag } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const OrderConfirmation = () => {
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const [orderDetails, setOrderDetails] = useState<any>(null);
 
   useEffect(() => {
-    // Get order details from URL parameters or localStorage
-    const orderData = {
-      orderId: searchParams.get('orderId') || `NAZ-${Date.now()}`,
-      amount: searchParams.get('amount') || '0',
-      service: searchParams.get('service') || 'Standard Service',
-      cardCount: searchParams.get('cardCount') || '1',
-      customerEmail: searchParams.get('email') || 'customer@example.com',
-      hasDiamondSleeve: searchParams.get('diamondSleeve') === 'true',
-      timestamp: new Date().toISOString()
-    };
-    
-    setOrderDetails(orderData);
-  }, [searchParams]);
+    // Check if this is a product order from checkout
+    if (location.state?.orderData && location.state?.isProductOrder) {
+      setOrderDetails({
+        ...location.state.orderData,
+        isProductOrder: true
+      });
+    } else {
+      // Get grading order details from URL parameters
+      const orderData = {
+        orderId: searchParams.get('orderId') || `NAZ-${Date.now()}`,
+        amount: searchParams.get('amount') || '0',
+        service: searchParams.get('service') || 'Standard Service',
+        cardCount: searchParams.get('cardCount') || '1',
+        customerEmail: searchParams.get('email') || 'customer@example.com',
+        hasDiamondSleeve: searchParams.get('diamondSleeve') === 'true',
+        timestamp: new Date().toISOString(),
+        isProductOrder: false
+      };
+      
+      setOrderDetails(orderData);
+    }
+  }, [searchParams, location.state]);
 
   if (!orderDetails) {
     return <div>Loading...</div>;
@@ -49,9 +59,14 @@ const OrderConfirmation = () => {
                   <CheckCircle className="w-16 h-16 text-green-600" />
                 </div>
               </div>
-              <h1 className="text-4xl font-bold mb-4 text-green-600">Payment Successful!</h1>
+              <h1 className="text-4xl font-bold mb-4 text-green-600">
+                {orderDetails.isProductOrder ? 'Order Confirmed!' : 'Payment Successful!'}
+              </h1>
               <p className="text-xl text-muted-foreground">
-                Your order has been confirmed and is being processed
+                {orderDetails.isProductOrder 
+                  ? 'Your order has been confirmed and will be shipped soon'
+                  : 'Your order has been confirmed and is being processed'
+                }
               </p>
             </div>
 
@@ -60,31 +75,72 @@ const OrderConfirmation = () => {
               {/* Order Summary */}
               <Card className="p-8">
                 <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                  <Package className="w-6 h-6 text-accent" />
+                  {orderDetails.isProductOrder ? (
+                    <ShoppingBag className="w-6 h-6 text-accent" />
+                  ) : (
+                    <Package className="w-6 h-6 text-accent" />
+                  )}
                   Order Summary
                 </h2>
                 
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between py-2 border-b">
                     <span className="font-medium">Order ID:</span>
-                    <span className="font-mono text-accent">{orderDetails.orderId}</span>
+                    <span className="font-mono text-accent">{orderDetails.id || orderDetails.orderId}</span>
                   </div>
                   
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="font-medium">Service:</span>
-                    <span>{orderDetails.service}</span>
-                  </div>
-                  
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="font-medium">Number of Cards:</span>
-                    <span>{orderDetails.cardCount}</span>
-                  </div>
-                  
-                  {orderDetails.hasDiamondSleeve && (
-                    <div className="flex justify-between py-2 border-b">
-                      <span className="font-medium">Diamond Sleeve:</span>
-                      <span className="text-accent">✓ Included</span>
-                    </div>
+                  {orderDetails.isProductOrder ? (
+                    <>
+                      {/* Product Order Details */}
+                      <div className="space-y-2">
+                        <span className="font-medium">Items:</span>
+                        {orderDetails.items?.map((item: any, index: number) => (
+                          <div key={index} className="flex justify-between py-1 text-sm border-b border-gray-100">
+                            <span>{item.productName} (x{item.quantity})</span>
+                            <span>£{(item.price * item.quantity).toLocaleString()}</span>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="font-medium">Subtotal:</span>
+                        <span>£{orderDetails.subtotal?.toLocaleString()}</span>
+                      </div>
+                      
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="font-medium">Shipping:</span>
+                        <span>{orderDetails.shipping === 0 ? 'Free' : `£${orderDetails.shipping?.toFixed(2)}`}</span>
+                      </div>
+                      
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="font-medium">Shipping Address:</span>
+                        <div className="text-right text-sm">
+                          <div>{orderDetails.shippingAddress?.address}</div>
+                          <div>{orderDetails.shippingAddress?.city}, {orderDetails.shippingAddress?.postcode}</div>
+                          <div>{orderDetails.shippingAddress?.country}</div>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* Grading Service Details */}
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="font-medium">Service:</span>
+                        <span>{orderDetails.service}</span>
+                      </div>
+                      
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="font-medium">Number of Cards:</span>
+                        <span>{orderDetails.cardCount}</span>
+                      </div>
+                      
+                      {orderDetails.hasDiamondSleeve && (
+                        <div className="flex justify-between py-2 border-b">
+                          <span className="font-medium">Diamond Sleeve:</span>
+                          <span className="text-accent">✓ Included</span>
+                        </div>
+                      )}
+                    </>
                   )}
                   
                   <div className="flex justify-between py-2 border-b">
@@ -94,7 +150,12 @@ const OrderConfirmation = () => {
                   
                   <div className="flex justify-between py-3 text-xl font-bold text-accent border-t-2">
                     <span>Total Paid:</span>
-                    <span>{formatAmount(orderDetails.amount)}</span>
+                    <span>
+                      {orderDetails.isProductOrder 
+                        ? `£${orderDetails.total?.toLocaleString()}`
+                        : formatAmount(orderDetails.amount)
+                      }
+                    </span>
                   </div>
                 </div>
 
@@ -117,45 +178,93 @@ const OrderConfirmation = () => {
                 </h2>
                 
                 <div className="space-y-6">
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center font-bold">1</div>
-                    <div>
-                      <h3 className="font-semibold mb-1">Confirmation Email</h3>
-                      <p className="text-sm text-muted-foreground">
-                        You'll receive a confirmation email with shipping instructions within 15 minutes.
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center font-bold">2</div>
-                    <div>
-                      <h3 className="font-semibold mb-1">Ship Your Cards</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Follow the provided shipping instructions to send us your cards securely.
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center font-bold">3</div>
-                    <div>
-                      <h3 className="font-semibold mb-1">Professional Grading</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Our experts will grade your cards according to industry standards.
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center font-bold">4</div>
-                    <div>
-                      <h3 className="font-semibold mb-1">Secure Return</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Your graded cards will be returned in protective slabs with tracking.
-                      </p>
-                    </div>
-                  </div>
+                  {orderDetails.isProductOrder ? (
+                    <>
+                      {/* Product Order Steps */}
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center font-bold">1</div>
+                        <div>
+                          <h3 className="font-semibold mb-1">Order Confirmation</h3>
+                          <p className="text-sm text-muted-foreground">
+                            You'll receive a confirmation email with order details within 15 minutes.
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center font-bold">2</div>
+                        <div>
+                          <h3 className="font-semibold mb-1">Order Processing</h3>
+                          <p className="text-sm text-muted-foreground">
+                            We'll prepare your items for shipping within 1-2 business days.
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center font-bold">3</div>
+                        <div>
+                          <h3 className="font-semibold mb-1">Shipping & Tracking</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Your order will be shipped with tracking information provided via email.
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center font-bold">4</div>
+                        <div>
+                          <h3 className="font-semibold mb-1">Delivery</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Your items will be delivered to your specified address within 3-5 business days.
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* Grading Service Steps */}
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center font-bold">1</div>
+                        <div>
+                          <h3 className="font-semibold mb-1">Confirmation Email</h3>
+                          <p className="text-sm text-muted-foreground">
+                            You'll receive a confirmation email with shipping instructions within 15 minutes.
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center font-bold">2</div>
+                        <div>
+                          <h3 className="font-semibold mb-1">Ship Your Cards</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Follow the provided shipping instructions to send us your cards securely.
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center font-bold">3</div>
+                        <div>
+                          <h3 className="font-semibold mb-1">Professional Grading</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Our experts will grade your cards according to industry standards.
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center font-bold">4</div>
+                        <div>
+                          <h3 className="font-semibold mb-1">Secure Return</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Your graded cards will be returned in protective slabs with tracking.
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </Card>
             </div>

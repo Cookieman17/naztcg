@@ -18,6 +18,7 @@ import AdminOrders from "./pages/AdminOrders";
 import AdminProducts from "./pages/AdminProducts";
 import AdminCustomers from "./pages/AdminCustomers";
 import AdminSettings from "./pages/AdminSettings";
+import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
 import StripeProvider from "@/components/StripeProvider";
 import { useAdminIntegration } from "@/lib/adminIntegration";
@@ -41,6 +42,7 @@ const App = () => {
             <Route path="/shop" element={<Shop />} />
             <Route path="/product/:id" element={<Product />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
             <Route path="/submit" element={<Submit />} />
             <Route path="/verify" element={<Verify />} />
             <Route path="/order-confirmation" element={<OrderConfirmation />} />

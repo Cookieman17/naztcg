@@ -9,7 +9,7 @@ type CartItem = {
 type CartContextValue = {
   items: CartItem[];
   addToCart: (product: Product, qty?: number) => void;
-  removeFromCart: (productId: number) => void;
+  removeFromCart: (productId: number | string) => void;
   clearCart: () => void;
   totalItems: number;
 };
@@ -40,7 +40,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const removeFromCart = (productId: number) => {
+  const removeFromCart = (productId: number | string) => {
     setItems((prev) => prev.filter(i => i.product.id !== productId));
   };
 

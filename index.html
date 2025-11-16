@@ -22,14 +22,17 @@
     
     <!-- GitHub Pages SPA routing fix -->
     <script>
-      (function(l) {
-        // Only apply redirect logic on production domains
-        if ((l.hostname === 'naztcg.com' || l.hostname.includes('github.io')) && sessionStorage.redirect) {
+      (function() {
+        // Only apply redirect logic on production domains, never in development
+        var isProduction = (location.hostname === 'naztcg.com' || location.hostname.includes('github.io'));
+        var isDevelopment = (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.port === '8080');
+        
+        if (isProduction && !isDevelopment && sessionStorage.redirect) {
           var redirect = sessionStorage.redirect;
           delete sessionStorage.redirect;
-          l.replace(redirect);
+          location.replace(redirect);
         }
-      }(window.location))
+      })()
     </script>
     
     <script type="module" src="/src/main.tsx"></script>

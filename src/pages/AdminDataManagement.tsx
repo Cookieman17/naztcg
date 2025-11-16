@@ -105,11 +105,13 @@ const AdminDataManagement = () => {
     const products = JSON.parse(localStorage.getItem('adminProducts') || '[]');
     const orders = JSON.parse(localStorage.getItem('adminOrders') || '[]');
     const customers = JSON.parse(localStorage.getItem('adminCustomers') || '[]');
+    const discountCodes = JSON.parse(localStorage.getItem('adminDiscountCodes') || '[]');
     
     return {
       products: products.length,
       orders: orders.length,
       customers: customers.length,
+      discountCodes: discountCodes.length,
       totalRevenue: orders.reduce((sum: number, order: any) => sum + (order.total || 0), 0)
     };
   };
@@ -163,8 +165,8 @@ const AdminDataManagement = () => {
           <div className="flex items-center space-x-2">
             <Clock className="h-4 w-4 text-orange-500" />
             <div>
-              <p className="text-sm font-medium">Revenue</p>
-              <p className="text-2xl font-bold">£{stats.totalRevenue.toLocaleString()}</p>
+              <p className="text-sm font-medium">Discount Codes</p>
+              <p className="text-2xl font-bold">{stats.discountCodes}</p>
             </div>
           </div>
         </Card>

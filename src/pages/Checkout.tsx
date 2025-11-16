@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import StripePaymentButton from "@/components/StripePaymentButton";
 import type { PaymentData } from "@/components/StripePaymentButton";
+import type { DiscountCode } from "./AdminDiscountCodes";
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -25,11 +26,27 @@ const Checkout = () => {
     postcode: "",
     country: "United Kingdom"
   });
+  const [discountCode, setDiscountCode] = useState("");
+  const [appliedDiscount, setAppliedDiscount] = useState<DiscountCode | null>(null);
+  const [discountError, setDiscountError] = useState("");
 
   // Calculate totals
   const subtotal = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
   const shipping = subtotal > 50 ? 0 : 4.99; // Free shipping over £50
-  const total = subtotal + shipping;
+  
+  // Calculate discount amount
+  let discountAmount = 0;
+  if (appliedDiscount) {
+    if (appliedDiscount.type === 'percentage') {
+      discountAmount = (subtotal * appliedDiscount.value) / 100;
+    } else {
+      discountAmount = appliedDiscount.value;
+    }
+    // Ensure discount doesn't exceed subtotal
+    discountAmount = Math.min(discountAmount, subtotal);
+  }
+  
+  const total = subtotal - discountAmount + shipping;
 
   // Redirect if cart is empty
   if (items.length === 0) {
@@ -54,6 +71,75 @@ const Checkout = () => {
     setCustomerInfo(prev => ({ ...prev, [field]: value }));
   };
 
+  const validateDiscountCode = () => {
+    if (!discountCode.trim()) {
+      setDiscountError("Please enter a discount code");
+      return;
+    }
+
+    // Get discount codes from localStorage
+    const savedCodes = localStorage.getItem('adminDiscountCodes');
+    const discountCodes: DiscountCode[] = savedCodes ? JSON.parse(savedCodes) : [];
+    
+    // Find the discount code
+    const code = discountCodes.find(c => 
+      c.code.toLowerCase() === discountCode.toLowerCase().trim()
+    );
+
+    if (!code) {
+      setDiscountError("Invalid discount code");
+      return;
+    }
+
+    // Check if code is active
+    if (!code.isActive) {
+      setDiscountError("This discount code is not active");
+      return;
+    }
+
+    // Check if code has started
+    if (code.startDate && new Date(code.startDate) > new Date()) {
+      setDiscountError("This discount code is not yet valid");
+      return;
+    }
+
+    // Check if code has expired
+    if (code.endDate && new Date(code.endDate) < new Date()) {
+      setDiscountError("This discount code has expired");
+      return;
+    }
+
+    // Check minimum order amount
+    if (code.minimumOrder > 0 && subtotal < code.minimumOrder) {
+      setDiscountError(`Minimum order of £${code.minimumOrder.toFixed(2)} required for this discount`);
+      return;
+    }
+
+    // Check usage limit
+    if (code.maxUses > 0 && code.currentUses >= code.maxUses) {
+      setDiscountError("This discount code has reached its usage limit");
+      return;
+    }
+
+    // Apply the discount
+    setAppliedDiscount(code);
+    setDiscountError("");
+    toast({
+      title: "Discount Applied!",
+      description: `${code.description} - ${code.type === 'percentage' ? code.value + '%' : '£' + code.value.toFixed(2)} off`,
+    });
+  };
+
+  const removeDiscount = () => {
+    setAppliedDiscount(null);
+    setDiscountCode("");
+    setDiscountError("");
+    toast({
+      title: "Discount Removed",
+      description: "Discount code has been removed from your order.",
+    });
+  };
+
   const handlePaymentSuccess = (paymentData: PaymentData) => {
     // Create order from cart items
     const orderData = {
@@ -75,6 +161,8 @@ const Checkout = () => {
         total: item.product.price * item.quantity
       })),
       subtotal,
+      discountCode: appliedDiscount?.code || null,
+      discountAmount,
       shipping,
       total,
       paymentIntentId: paymentData.paymentIntentId,
@@ -87,6 +175,21 @@ const Checkout = () => {
     const existingOrders = JSON.parse(localStorage.getItem('adminOrders') || '[]');
     existingOrders.push(orderData);
     localStorage.setItem('adminOrders', JSON.stringify(existingOrders));
+
+    // Update discount code usage count
+    if (appliedDiscount) {
+      const savedCodes = localStorage.getItem('adminDiscountCodes');
+      if (savedCodes) {
+        const discountCodes: DiscountCode[] = JSON.parse(savedCodes);
+        const updatedCodes = discountCodes.map(code => 
+          code.id === appliedDiscount.id 
+            ? { ...code, currentUses: code.currentUses + 1 }
+            : code
+        );
+        localStorage.setItem('adminDiscountCodes', JSON.stringify(updatedCodes));
+        window.dispatchEvent(new CustomEvent('discountCodesUpdated'));
+      }
+    }
 
     // Dispatch event for real-time updates
     window.dispatchEvent(new CustomEvent('ordersUpdated'));
@@ -240,6 +343,12 @@ const Checkout = () => {
                       <span>Subtotal</span>
                       <span>£{subtotal.toLocaleString()}</span>
                     </div>
+                    {appliedDiscount && (
+                      <div className="flex justify-between text-green-600">
+                        <span>Discount ({appliedDiscount.code})</span>
+                        <span>-£{discountAmount.toFixed(2)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between">
                       <span>Shipping</span>
                       <span>{shipping === 0 ? 'Free' : `£${shipping.toFixed(2)}`}</span>
@@ -257,6 +366,56 @@ const Checkout = () => {
                     </p>
                   )}
                 </div>
+              </Card>
+
+              {/* Discount Code Section */}
+              <Card className="p-6">
+                <h2 className="text-xl font-semibold mb-4">Discount Code</h2>
+                {appliedDiscount ? (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-green-800">{appliedDiscount.code}</p>
+                        <p className="text-sm text-green-600">{appliedDiscount.description}</p>
+                        <p className="text-sm text-green-600">
+                          Savings: £{discountAmount.toFixed(2)}
+                        </p>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={removeDiscount}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Enter discount code"
+                        value={discountCode}
+                        onChange={(e) => {
+                          setDiscountCode(e.target.value);
+                          setDiscountError("");
+                        }}
+                        className={discountError ? "border-red-500" : ""}
+                      />
+                      <Button 
+                        onClick={validateDiscountCode}
+                        disabled={!discountCode.trim()}
+                        variant="outline"
+                      >
+                        Apply
+                      </Button>
+                    </div>
+                    {discountError && (
+                      <p className="text-sm text-red-600">{discountError}</p>
+                    )}
+                  </div>
+                )}
               </Card>
 
               {/* Payment Section */}

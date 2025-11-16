@@ -19,6 +19,7 @@ import AdminProducts from "./pages/AdminProducts";
 import AdminCustomers from "./pages/AdminCustomers";
 import AdminSettings from "./pages/AdminSettings";
 import AdminDataManagement from "./pages/AdminDataManagement";
+import AdminDiscountCodes from "./pages/AdminDiscountCodes";
 import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
 import StripeProvider from "@/components/StripeProvider";
@@ -56,6 +57,7 @@ const App = () => {
               <Route path="orders" element={<AdminOrders />} />
               <Route path="products" element={<AdminProducts />} />
               <Route path="customers" element={<AdminCustomers />} />
+              <Route path="discount-codes" element={<AdminDiscountCodes />} />
               <Route path="settings" element={<AdminSettings />} />
               <Route path="data" element={<AdminDataManagement />} />
             </Route>

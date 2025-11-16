@@ -5,6 +5,7 @@ export interface BackupData {
   products: any[];
   orders: any[];
   customers: any[];
+  discountCodes: any[];
   timestamp: string;
   version: string;
 }
@@ -13,6 +14,7 @@ export interface StorageKeys {
   PRODUCTS: 'adminProducts';
   ORDERS: 'adminOrders';
   CUSTOMERS: 'adminCustomers';
+  DISCOUNT_CODES: 'adminDiscountCodes';
   BACKUP: 'naztcg_backup';
   LAST_BACKUP: 'naztcg_last_backup';
 }
@@ -21,6 +23,7 @@ export const STORAGE_KEYS: StorageKeys = {
   PRODUCTS: 'adminProducts',
   ORDERS: 'adminOrders',
   CUSTOMERS: 'adminCustomers',
+  DISCOUNT_CODES: 'adminDiscountCodes',
   BACKUP: 'naztcg_backup',
   LAST_BACKUP: 'naztcg_last_backup'
 };
@@ -41,6 +44,7 @@ class DataPersistenceManager {
       products: JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]'),
       orders: JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]'),
       customers: JSON.parse(localStorage.getItem(STORAGE_KEYS.CUSTOMERS) || '[]'),
+      discountCodes: JSON.parse(localStorage.getItem(STORAGE_KEYS.DISCOUNT_CODES) || '[]'),
       timestamp: new Date().toISOString(),
       version: '1.0.0'
     };
@@ -58,11 +62,13 @@ class DataPersistenceManager {
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(backupData.products));
       localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(backupData.orders));
       localStorage.setItem(STORAGE_KEYS.CUSTOMERS, JSON.stringify(backupData.customers));
+      localStorage.setItem(STORAGE_KEYS.DISCOUNT_CODES, JSON.stringify(backupData.discountCodes || []));
       
       // Trigger updates
       window.dispatchEvent(new CustomEvent('productsUpdated'));
       window.dispatchEvent(new CustomEvent('ordersUpdated'));
       window.dispatchEvent(new CustomEvent('customersUpdated'));
+      window.dispatchEvent(new CustomEvent('discountCodesUpdated'));
       
       return true;
     } catch (error) {

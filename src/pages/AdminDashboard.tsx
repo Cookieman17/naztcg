@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { 
   DollarSign, 
   ShoppingCart, 
@@ -9,8 +12,11 @@ import {
   TrendingUp,
   Calendar,
   Clock,
-  AlertCircle
+  AlertCircle,
+  Database,
+  Download
 } from "lucide-react";
+import { getBackupInfo } from "@/lib/dataPersistence";
 
 interface DashboardStats {
   totalRevenue: number;
@@ -101,6 +107,11 @@ const AdminDashboard = () => {
     }
   };
 
+  const backupInfo = getBackupInfo();
+  const lastBackupDate = backupInfo.lastBackup ? new Date(backupInfo.lastBackup) : null;
+  const daysSinceBackup = lastBackupDate ? Math.floor((new Date().getTime() - lastBackupDate.getTime()) / (1000 * 3600 * 24)) : null;
+  const needsBackup = !backupInfo.hasBackup || (daysSinceBackup && daysSinceBackup > 7);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -108,6 +119,30 @@ const AdminDashboard = () => {
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
         <p className="text-gray-600 mt-2">Welcome back to your NAZ TCG admin panel</p>
       </div>
+
+      {/* Data Backup Warning */}
+      {needsBackup && (
+        <Alert className="border-orange-200 bg-orange-50">
+          <Database className="h-4 w-4 text-orange-500" />
+          <AlertDescription className="flex items-center justify-between">
+            <div>
+              <strong className="text-orange-800">Data Backup Recommended</strong>
+              <p className="text-orange-700 mt-1">
+                {!backupInfo.hasBackup 
+                  ? "No backup found. Create your first backup to protect your data."
+                  : `Last backup was ${daysSinceBackup} days ago. Regular backups protect against data loss.`
+                }
+              </p>
+            </div>
+            <Link to="/admin/data">
+              <Button variant="outline" size="sm" className="border-orange-300 text-orange-700 hover:bg-orange-100">
+                <Download className="h-4 w-4 mr-2" />
+                Backup Now
+              </Button>
+            </Link>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

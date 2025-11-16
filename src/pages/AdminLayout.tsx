@@ -8,6 +8,7 @@ import {
   Package, 
   Users, 
   Settings, 
+  Database,
   LogOut,
   Menu,
   X
@@ -36,6 +37,7 @@ const AdminLayout = () => {
     { path: "/admin/orders", label: "Orders", icon: ShoppingCart },
     { path: "/admin/products", label: "Products", icon: Package },
     { path: "/admin/customers", label: "Customers", icon: Users },
+    { path: "/admin/data", label: "Data Management", icon: Database },
     { path: "/admin/settings", label: "Settings", icon: Settings },
   ];
 

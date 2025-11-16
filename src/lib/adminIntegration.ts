@@ -1,8 +1,12 @@
 import { useEffect } from 'react';
+import { initializeDataPersistence } from './dataPersistence';
 
 // Admin integration utility for handling order events and data management
 export const useAdminIntegration = () => {
   useEffect(() => {
+    // Initialize data persistence system
+    initializeDataPersistence();
+    
     // Initialize sample data on first load
     initializeSampleData();
     

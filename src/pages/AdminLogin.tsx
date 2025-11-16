@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,17 +9,21 @@ const AdminLogin = () => {
   const [credentials, setCredentials] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   // Check if already logged in
   const isLoggedIn = localStorage.getItem("adminLoggedIn") === "true";
   if (isLoggedIn) {
-    return <Navigate to="/admin/dashboard" replace />;
+    return <Navigate to="/admin" replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+
+    // Add a small delay to show the loading state
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     // Simple hardcoded credentials for demo
     if (credentials.username === "admin" && credentials.password === "naztcg2024") {
@@ -29,12 +33,13 @@ const AdminLogin = () => {
         role: "admin",
         loginTime: new Date().toISOString()
       }));
-      window.location.href = "/admin/dashboard";
+      
+      // Use React Router navigation instead of window.location
+      navigate("/admin", { replace: true });
     } else {
       setError("Invalid credentials. Please try again.");
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   return (

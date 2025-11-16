@@ -9,7 +9,8 @@ import {
   Users, 
   Settings, 
   LogOut,
-  Menu
+  Menu,
+  X
 } from "lucide-react";
 import { useState } from "react";
 
@@ -31,7 +32,7 @@ const AdminLayout = () => {
   };
 
   const navigationItems = [
-    { path: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { path: "/admin/orders", label: "Orders", icon: ShoppingCart },
     { path: "/admin/products", label: "Products", icon: Package },
     { path: "/admin/customers", label: "Customers", icon: Users },
@@ -41,7 +42,7 @@ const AdminLayout = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile header */}
-      <div className="lg:hidden bg-white shadow-sm border-b px-4 py-3 flex items-center justify-between">
+      <div className="lg:hidden bg-white shadow-sm border-b px-4 py-3 flex items-center justify-between relative z-30">
         <h1 className="text-lg font-semibold">NAZ TCG Admin</h1>
         <Button
           variant="ghost"
@@ -55,22 +56,36 @@ const AdminLayout = () => {
       <div className="flex">
         {/* Sidebar */}
         <aside className={`
-          fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg border-r transform transition-transform duration-200 ease-in-out
-          lg:translate-x-0 lg:static lg:inset-0
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          fixed inset-y-0 left-0 z-[60] w-64 bg-white shadow-2xl border-r transform transition-transform duration-300 ease-in-out
+          lg:translate-x-0 lg:static lg:inset-0 lg:z-auto
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}>
           <div className="flex flex-col h-full">
             {/* Header */}
             <div className="p-6 border-b">
-              <h1 className="text-xl font-bold text-gray-900">NAZ TCG Admin</h1>
-              <p className="text-sm text-gray-500 mt-1">Trading Card Management</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-xl font-bold text-gray-900">NAZ TCG Admin</h1>
+                  <p className="text-sm text-gray-500 mt-1">Trading Card Management</p>
+                </div>
+                {/* Close button for mobile */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="lg:hidden"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
 
             {/* Navigation */}
             <nav className="flex-1 p-4 space-y-2">
               {navigationItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = location.pathname === item.path;
+                const isActive = location.pathname === item.path || 
+                  (item.path === '/admin' && (location.pathname === '/admin' || location.pathname === '/admin/dashboard'));
                 
                 return (
                   <Link
@@ -109,7 +124,7 @@ const AdminLayout = () => {
         {/* Mobile sidebar overlay */}
         {sidebarOpen && (
           <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+            className="fixed inset-0 bg-black bg-opacity-50 z-50 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}

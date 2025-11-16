@@ -6,10 +6,14 @@
     <title>NAZ Grading - Professional Pokémon Card Authentication</title>
     <meta name="description" content="Professional Pokémon card grading and authentication services. Trusted by collectors worldwide with fast turnaround, expert certification, and secure verification." />
     <script>
-      // Store the current URL for redirect after loading the main app
-      sessionStorage.redirect = location.href;
+      // GitHub Pages SPA routing - only for production
+      if (location.hostname === 'naztcg.com' || location.hostname.includes('github.io')) {
+        // Store the current URL for redirect after loading the main app
+        sessionStorage.redirect = location.href;
+        // Redirect to root only on GitHub Pages
+        location.replace('/');
+      }
     </script>
-    <meta http-equiv="refresh" content="0;URL='/'">
   </head>
   <body>
     <div id="root"></div>

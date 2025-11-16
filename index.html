@@ -23,7 +23,8 @@
     <!-- GitHub Pages SPA routing fix -->
     <script>
       (function(l) {
-        if (sessionStorage.redirect) {
+        // Only apply redirect logic on production domains
+        if ((l.hostname === 'naztcg.com' || l.hostname.includes('github.io')) && sessionStorage.redirect) {
           var redirect = sessionStorage.redirect;
           delete sessionStorage.redirect;
           l.replace(redirect);

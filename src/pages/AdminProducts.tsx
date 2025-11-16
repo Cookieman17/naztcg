@@ -23,6 +23,8 @@ interface Product {
   description: string;
   price: number;
   category: string;
+  series: string;
+  rarity: string;
   stock: number;
   image: string;
   status: 'active' | 'inactive';
@@ -35,6 +37,7 @@ const AdminProducts = () => {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [seriesFilter, setSeriesFilter] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState({
@@ -42,10 +45,14 @@ const AdminProducts = () => {
     description: "",
     price: "",
     category: "",
+    series: "",
+    rarity: "",
     stock: "",
     image: "",
     status: "active" as "active" | "inactive"
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
 
   useEffect(() => {
     // Load products from localStorage
@@ -55,13 +62,15 @@ const AdminProducts = () => {
   }, []);
 
   useEffect(() => {
-    // Filter products based on search and category
+    // Filter products based on search, category, and series
     let filtered = products;
 
     if (searchTerm) {
       filtered = filtered.filter(product =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchTerm.toLowerCase())
+        product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (product.series && product.series.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (product.rarity && product.rarity.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
@@ -69,10 +78,44 @@ const AdminProducts = () => {
       filtered = filtered.filter(product => product.category === categoryFilter);
     }
 
+    if (seriesFilter !== "all") {
+      filtered = filtered.filter(product => product.series === seriesFilter);
+    }
+
     setFilteredProducts(filtered);
-  }, [products, searchTerm, categoryFilter]);
+  }, [products, searchTerm, categoryFilter, seriesFilter]);
 
   const categories = ["Grading", "Trading Cards", "Accessories", "Supplies"];
+  const tcgSeries = [
+    "Base Set", "Jungle", "Fossil", "Team Rocket", "Gym Heroes", "Gym Challenge",
+    "Neo Genesis", "Neo Discovery", "Neo Destiny", "Neo Revelation",
+    "Expedition", "Aquapolis", "Skyridge",
+    "Ruby & Sapphire", "Sandstorm", "Dragon", "Team Magma vs Team Aqua",
+    "Hidden Legends", "FireRed & LeafGreen", "Team Rocket Returns",
+    "Deoxys", "Emerald", "Unseen Forces", "Delta Species",
+    "Legend Maker", "Holon Phantoms", "Crystal Guardians", "Dragon Frontiers",
+    "Power Keepers", "Diamond & Pearl", "Mysterious Treasures", "Secret Wonders",
+    "Great Encounters", "Majestic Dawn", "Legends Awakened", "Stormfront",
+    "Platinum", "Rising Rivals", "Supreme Victors", "Arceus",
+    "HeartGold & SoulSilver", "Unleashed", "Undaunted", "Triumphant",
+    "Black & White", "Emerging Powers", "Noble Victories", "Next Destinies",
+    "Dark Explorers", "Dragons Exalted", "Boundaries Crossed", "Plasma Storm",
+    "Plasma Freeze", "Plasma Blast", "Legendary Treasures",
+    "XY", "Flashfire", "Furious Fists", "Phantom Forces", "Primal Clash",
+    "Roaring Skies", "Ancient Origins", "BREAKthrough", "BREAKpoint",
+    "Generations", "Fates Collide", "Steam Siege", "Evolutions",
+    "Sun & Moon", "Guardians Rising", "Burning Shadows", "Crimson Invasion",
+    "Ultra Prism", "Forbidden Light", "Celestial Storm", "Dragon Majesty",
+    "Lost Thunder", "Team Up", "Detective Pikachu", "Unbroken Bonds",
+    "Unified Minds", "Hidden Fates", "Cosmic Eclipse",
+    "Sword & Shield", "Rebel Clash", "Darkness Ablaze", "Vivid Voltage",
+    "Battle Styles", "Chilling Reign", "Evolving Skies", "Fusion Strike",
+    "Brilliant Stars", "Astral Radiance", "Pokemon GO", "Lost Origin",
+    "Silver Tempest", "Paldea Evolved", "Obsidian Flames", "151",
+    "Paradox Rift", "Paldean Fates", "Temporal Forces", "Twilight Masquerade",
+    "Shrouded Fable", "Stellar Crown", "Surging Sparks"
+  ];
+  const rarities = ["Common", "Uncommon", "Rare", "Rare Holo", "Ultra Rare", "Secret Rare", "Promo"];
 
   const resetForm = () => {
     setFormData({
@@ -80,11 +123,31 @@ const AdminProducts = () => {
       description: "",
       price: "",
       category: "",
+      series: "",
+      rarity: "",
       stock: "",
       image: "",
       status: "active"
     });
     setEditingProduct(null);
+    setImageFile(null);
+    setImagePreview("");
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setImagePreview(result);
+        setFormData(prev => ({ ...prev, image: result }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -96,8 +159,10 @@ const AdminProducts = () => {
       description: formData.description,
       price: parseFloat(formData.price),
       category: formData.category,
+      series: formData.series,
+      rarity: formData.rarity,
       stock: parseInt(formData.stock),
-      image: formData.image || "/api/placeholder/300/200",
+      image: formData.image || imagePreview || "/api/placeholder/300/200",
       status: formData.status,
       createdAt: editingProduct?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -124,10 +189,13 @@ const AdminProducts = () => {
       description: product.description,
       price: product.price.toString(),
       category: product.category,
+      series: product.series || "",
+      rarity: product.rarity || "",
       stock: product.stock.toString(),
       image: product.image,
       status: product.status
     });
+    setImagePreview(product.image);
     setIsDialogOpen(true);
   };
 
@@ -203,6 +271,41 @@ const AdminProducts = () => {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">TCG Series</label>
+                  <Select
+                    value={formData.series}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, series: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select TCG series" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60 overflow-y-auto">
+                      {tcgSeries.map(series => (
+                        <SelectItem key={series} value={series}>{series}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Rarity</label>
+                  <Select
+                    value={formData.rarity}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, rarity: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select rarity" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {rarities.map(rarity => (
+                        <SelectItem key={rarity} value={rarity}>{rarity}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               <div>
                 <label className="text-sm font-medium">Description</label>
                 <Textarea
@@ -253,12 +356,43 @@ const AdminProducts = () => {
               </div>
 
               <div>
-                <label className="text-sm font-medium">Image URL</label>
-                <Input
-                  value={formData.image}
-                  onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                  placeholder="https://example.com/image.jpg"
-                />
+                <label className="text-sm font-medium">Product Image</label>
+                <div className="space-y-4">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="cursor-pointer"
+                  />
+                  <div className="text-sm text-gray-500">
+                    Upload from your phone or device. Supported formats: JPG, PNG, GIF
+                  </div>
+                  
+                  {imagePreview && (
+                    <div className="mt-4">
+                      <label className="text-sm font-medium">Preview:</label>
+                      <div className="mt-2 border rounded-lg p-2 bg-gray-50">
+                        <img 
+                          src={imagePreview} 
+                          alt="Product preview" 
+                          className="max-w-full h-32 object-cover rounded"
+                        />
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="text-xs text-gray-400">
+                    Or enter image URL manually:
+                  </div>
+                  <Input
+                    value={formData.image}
+                    onChange={(e) => {
+                      setFormData(prev => ({ ...prev, image: e.target.value }));
+                      setImagePreview(e.target.value);
+                    }}
+                    placeholder="https://example.com/image.jpg"
+                  />
+                </div>
               </div>
 
               <div className="flex justify-end gap-3 pt-4">
@@ -277,29 +411,43 @@ const AdminProducts = () => {
       {/* Filters */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col gap-4">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search products by name or description..."
+                  placeholder="Search products by name, description, series, or rarity..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
               </div>
             </div>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filter by category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map(category => (
-                  <SelectItem key={category} value={category}>{category}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="Filter by category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map(category => (
+                    <SelectItem key={category} value={category}>{category}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Select value={seriesFilter} onValueChange={setSeriesFilter}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="Filter by series" />
+                </SelectTrigger>
+                <SelectContent className="max-h-60 overflow-y-auto">
+                  <SelectItem value="all">All Series</SelectItem>
+                  {tcgSeries.map(series => (
+                    <SelectItem key={series} value={series}>{series}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -334,9 +482,11 @@ const AdminProducts = () => {
                       </Badge>
                     </div>
 
-                    <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div className="grid grid-cols-2 gap-2 text-sm text-gray-500">
                       <span>Stock: {product.stock}</span>
                       <span>{product.category}</span>
+                      {product.series && <span>Series: {product.series}</span>}
+                      {product.rarity && <span>Rarity: {product.rarity}</span>}
                     </div>
 
                     <div className="flex items-center gap-2 pt-2">

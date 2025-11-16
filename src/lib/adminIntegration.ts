@@ -3,6 +3,9 @@ import { useEffect } from 'react';
 // Admin integration utility for handling order events and data management
 export const useAdminIntegration = () => {
   useEffect(() => {
+    // Initialize sample data on first load
+    initializeSampleData();
+    
     // Listen for order creation events from the payment system
     const handleOrderCreated = (event: CustomEvent) => {
       const orderData = event.detail;
@@ -103,6 +106,8 @@ export const initializeSampleData = () => {
         description: 'Professional card grading and authentication service',
         price: 25.00,
         category: 'Grading',
+        series: '',
+        rarity: '',
         stock: 100,
         image: '/api/placeholder/300/200',
         status: 'active',
@@ -115,6 +120,8 @@ export const initializeSampleData = () => {
         description: 'Beckett Grading Services authentication',
         price: 30.00,
         category: 'Grading',
+        series: '',
+        rarity: '',
         stock: 75,
         image: '/api/placeholder/300/200',
         status: 'active',
@@ -123,10 +130,26 @@ export const initializeSampleData = () => {
       },
       {
         id: '3',
+        name: 'Charizard Base Set',
+        description: 'Iconic Charizard from the original Base Set',
+        price: 350.00,
+        category: 'Trading Cards',
+        series: 'Base Set',
+        rarity: 'Rare Holo',
+        stock: 5,
+        image: '/api/placeholder/300/200',
+        status: 'active',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: '4',
         name: 'Card Sleeves (100 pack)',
         description: 'Premium card protection sleeves',
         price: 12.99,
         category: 'Accessories',
+        series: '',
+        rarity: '',
         stock: 50,
         image: '/api/placeholder/300/200',
         status: 'active',

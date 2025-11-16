@@ -23,14 +23,23 @@
     <!-- GitHub Pages SPA routing fix -->
     <script>
       (function() {
-        // Only apply redirect logic on production domains, never in development
+        // GitHub Pages SPA routing with loop prevention
         var isProduction = (location.hostname === 'naztcg.com' || location.hostname.includes('github.io'));
         var isDevelopment = (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.port === '8080');
         
         if (isProduction && !isDevelopment && sessionStorage.redirect) {
           var redirect = sessionStorage.redirect;
+          var currentPath = location.pathname + location.search + location.hash;
+          var redirectPath = new URL(redirect).pathname + new URL(redirect).search + new URL(redirect).hash;
+          
+          // Clear redirect data
           delete sessionStorage.redirect;
-          location.replace(redirect);
+          delete sessionStorage.redirectCount;
+          
+          // Only redirect if we're not already at the target path
+          if (currentPath !== redirectPath && redirectPath !== '/') {
+            location.replace(redirect);
+          }
         }
       })()
     </script>

@@ -57,6 +57,14 @@ const Footer = () => {
         
         <div className="border-t border-primary-foreground/20 pt-8 text-center text-sm text-primary-foreground/60">
           <p>&copy; {new Date().getFullYear()} NAZ Grading. All rights reserved.</p>
+          <div className="mt-2">
+            <Link 
+              to="/admin/login" 
+              className="text-primary-foreground/40 hover:text-primary-foreground/60 transition-colors text-xs"
+            >
+              Admin
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

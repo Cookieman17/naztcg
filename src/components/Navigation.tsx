@@ -148,7 +148,7 @@ const Navigation = () => {
 
       {/* Slide-out panel (from the left) */}
       <aside
-        className={`fixed top-0 left-0 h-full w-[85%] max-w-xs bg-card z-50 shadow-xl transform transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed top-0 left-0 h-full w-[85%] max-w-xs bg-white dark:bg-gray-900 z-50 shadow-xl transform transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`}
         aria-hidden={!open}
         role="dialog"
         aria-modal={open}

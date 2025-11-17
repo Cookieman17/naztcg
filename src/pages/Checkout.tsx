@@ -27,26 +27,35 @@ const Checkout = () => {
     country: "United Kingdom"
   });
   const [discountCode, setDiscountCode] = useState("");
-  const [appliedDiscount, setAppliedDiscount] = useState<DiscountCode | null>(null);
+  const [appliedDiscounts, setAppliedDiscounts] = useState<DiscountCode[]>([]);
   const [discountError, setDiscountError] = useState("");
 
   // Calculate totals
   const subtotal = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
   const shipping = subtotal > 50 ? 0 : 4.99; // Free shipping over £50
   
-  // Calculate discount amount
-  let discountAmount = 0;
-  if (appliedDiscount) {
-    if (appliedDiscount.type === 'percentage') {
-      discountAmount = (subtotal * appliedDiscount.value) / 100;
-    } else {
-      discountAmount = appliedDiscount.value;
-    }
-    // Ensure discount doesn't exceed subtotal
-    discountAmount = Math.min(discountAmount, subtotal);
-  }
+  // Calculate discount amounts
+  let productDiscountAmount = 0;
+  let shippingDiscountAmount = 0;
+  let hasFreeShipping = false;
   
-  const total = subtotal - discountAmount + shipping;
+  appliedDiscounts.forEach(discount => {
+    if (discount.type === 'free_shipping') {
+      hasFreeShipping = true;
+      shippingDiscountAmount = shipping;
+    } else if (discount.type === 'percentage') {
+      productDiscountAmount += (subtotal * discount.value) / 100;
+    } else if (discount.type === 'fixed') {
+      productDiscountAmount += discount.value;
+    }
+  });
+  
+  // Ensure product discount doesn't exceed subtotal
+  productDiscountAmount = Math.min(productDiscountAmount, subtotal);
+  const totalDiscountAmount = productDiscountAmount + shippingDiscountAmount;
+  
+  const finalShipping = hasFreeShipping ? 0 : shipping;
+  const total = subtotal - productDiscountAmount + finalShipping;
 
   // Redirect if cart is empty
   if (items.length === 0) {
@@ -91,6 +100,27 @@ const Checkout = () => {
       return;
     }
 
+    // Check if code is already applied
+    if (appliedDiscounts.some(d => d.id === code.id)) {
+      setDiscountError("This discount code is already applied");
+      return;
+    }
+
+    // Check if we can stack this discount
+    const hasNonStackableDiscount = appliedDiscounts.some(d => !d.isStackable);
+    const isCodeStackable = code.isStackable;
+    
+    if (appliedDiscounts.length > 0 && (!isCodeStackable || hasNonStackableDiscount)) {
+      setDiscountError("This discount cannot be combined with other offers");
+      return;
+    }
+
+    // Check for conflicting free shipping codes
+    if (code.type === 'free_shipping' && appliedDiscounts.some(d => d.type === 'free_shipping')) {
+      setDiscountError("Only one free shipping code can be applied");
+      return;
+    }
+
     // Check if code is active
     if (!code.isActive) {
       setDiscountError("This discount code is not active");
@@ -122,21 +152,38 @@ const Checkout = () => {
     }
 
     // Apply the discount
-    setAppliedDiscount(code);
+    setAppliedDiscounts(prev => [...prev, code]);
+    setDiscountCode("");
     setDiscountError("");
+    
+    const discountText = code.type === 'free_shipping' 
+      ? 'Free Shipping'
+      : code.type === 'percentage' 
+        ? code.value + '% off'
+        : '£' + code.value.toFixed(2) + ' off';
+    
     toast({
       title: "Discount Applied!",
-      description: `${code.description} - ${code.type === 'percentage' ? code.value + '%' : '£' + code.value.toFixed(2)} off`,
+      description: `${code.description} - ${discountText}`,
     });
   };
 
-  const removeDiscount = () => {
-    setAppliedDiscount(null);
-    setDiscountCode("");
+  const removeDiscount = (discountId: string) => {
+    setAppliedDiscounts(prev => prev.filter(d => d.id !== discountId));
     setDiscountError("");
     toast({
       title: "Discount Removed",
       description: "Discount code has been removed from your order.",
+    });
+  };
+
+  const removeAllDiscounts = () => {
+    setAppliedDiscounts([]);
+    setDiscountCode("");
+    setDiscountError("");
+    toast({
+      title: "All Discounts Removed",
+      description: "All discount codes have been removed from your order.",
     });
   };
 
@@ -161,9 +208,16 @@ const Checkout = () => {
         total: item.product.price * item.quantity
       })),
       subtotal,
-      discountCode: appliedDiscount?.code || null,
-      discountAmount,
-      shipping,
+      appliedDiscounts: appliedDiscounts.map(d => ({
+        code: d.code,
+        type: d.type,
+        value: d.value,
+        description: d.description
+      })),
+      productDiscountAmount,
+      shippingDiscountAmount,
+      totalDiscountAmount,
+      shipping: finalShipping,
       total,
       paymentIntentId: paymentData.paymentIntentId,
       status: 'confirmed',
@@ -176,16 +230,17 @@ const Checkout = () => {
     existingOrders.push(orderData);
     localStorage.setItem('adminOrders', JSON.stringify(existingOrders));
 
-    // Update discount code usage count
-    if (appliedDiscount) {
+    // Update discount code usage counts
+    if (appliedDiscounts.length > 0) {
       const savedCodes = localStorage.getItem('adminDiscountCodes');
       if (savedCodes) {
         const discountCodes: DiscountCode[] = JSON.parse(savedCodes);
-        const updatedCodes = discountCodes.map(code => 
-          code.id === appliedDiscount.id 
+        const updatedCodes = discountCodes.map(code => {
+          const appliedDiscount = appliedDiscounts.find(d => d.id === code.id);
+          return appliedDiscount 
             ? { ...code, currentUses: code.currentUses + 1 }
-            : code
-        );
+            : code;
+        });
         localStorage.setItem('adminDiscountCodes', JSON.stringify(updatedCodes));
         window.dispatchEvent(new CustomEvent('discountCodesUpdated'));
       }
@@ -343,15 +398,22 @@ const Checkout = () => {
                       <span>Subtotal</span>
                       <span>£{subtotal.toLocaleString()}</span>
                     </div>
-                    {appliedDiscount && (
-                      <div className="flex justify-between text-green-600">
-                        <span>Discount ({appliedDiscount.code})</span>
-                        <span>-£{discountAmount.toFixed(2)}</span>
+                    {appliedDiscounts.map((discount) => (
+                      <div key={discount.id} className="flex justify-between text-green-600">
+                        <span>{discount.type === 'free_shipping' ? 'Free Shipping' : `Discount (${discount.code})`}</span>
+                        <span>
+                          {discount.type === 'free_shipping' 
+                            ? `-£${shipping.toFixed(2)}` 
+                            : discount.type === 'percentage'
+                              ? `-£${((subtotal * discount.value) / 100).toFixed(2)}`
+                              : `-£${Math.min(discount.value, subtotal).toFixed(2)}`
+                          }
+                        </span>
                       </div>
-                    )}
+                    ))}
                     <div className="flex justify-between">
                       <span>Shipping</span>
-                      <span>{shipping === 0 ? 'Free' : `£${shipping.toFixed(2)}`}</span>
+                      <span>{finalShipping === 0 ? 'Free' : `£${finalShipping.toFixed(2)}`}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between text-lg font-semibold">
@@ -370,28 +432,52 @@ const Checkout = () => {
 
               {/* Discount Code Section */}
               <Card className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Discount Code</h2>
-                {appliedDiscount ? (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-green-800">{appliedDiscount.code}</p>
-                        <p className="text-sm text-green-600">{appliedDiscount.description}</p>
-                        <p className="text-sm text-green-600">
-                          Savings: £{discountAmount.toFixed(2)}
-                        </p>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold">Discount Codes</h2>
+                  {appliedDiscounts.length > 1 && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={removeAllDiscounts}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      Remove All
+                    </Button>
+                  )}
+                </div>
+                
+                {appliedDiscounts.length > 0 && (
+                  <div className="space-y-3 mb-4">
+                    {appliedDiscounts.map((discount) => (
+                      <div key={discount.id} className="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-green-800">{discount.code}</p>
+                            <p className="text-sm text-green-600">{discount.description}</p>
+                            <p className="text-sm text-green-600">
+                              {discount.type === 'free_shipping' 
+                                ? `Free Shipping: £${shipping.toFixed(2)} saved`
+                                : `Savings: £${discount.type === 'percentage' 
+                                    ? ((subtotal * discount.value) / 100).toFixed(2)
+                                    : Math.min(discount.value, subtotal).toFixed(2)}`
+                              }
+                            </p>
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => removeDiscount(discount.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            Remove
+                          </Button>
+                        </div>
                       </div>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={removeDiscount}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        Remove
-                      </Button>
-                    </div>
+                    ))}
                   </div>
-                ) : (
+                )}
+                
+                {(appliedDiscounts.length === 0 || appliedDiscounts.some(d => d.isStackable)) && (
                   <div className="space-y-4">
                     <div className="flex gap-2">
                       <Input

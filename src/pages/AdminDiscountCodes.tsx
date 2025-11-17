@@ -26,7 +26,7 @@ export interface DiscountCode {
   id: string;
   code: string;
   description: string;
-  type: 'percentage' | 'fixed';
+  type: 'percentage' | 'fixed' | 'free_shipping';
   value: number;
   minimumOrder: number;
   maxUses: number;
@@ -34,6 +34,7 @@ export interface DiscountCode {
   startDate: string;
   endDate: string;
   isActive: boolean;
+  isStackable: boolean;
   createdAt: string;
 }
 
@@ -45,13 +46,14 @@ const AdminDiscountCodes = () => {
   const [formData, setFormData] = useState({
     code: '',
     description: '',
-    type: 'percentage' as 'percentage' | 'fixed',
+    type: 'percentage' as 'percentage' | 'fixed' | 'free_shipping',
     value: '',
     minimumOrder: '',
     maxUses: '',
     startDate: '',
     endDate: '',
-    isActive: true
+    isActive: true,
+    isStackable: false
   });
 
   // Load discount codes from localStorage
@@ -80,7 +82,8 @@ const AdminDiscountCodes = () => {
       maxUses: '',
       startDate: '',
       endDate: '',
-      isActive: true
+      isActive: true,
+      isStackable: false
     });
     setEditingCode(null);
   };
@@ -89,7 +92,7 @@ const AdminDiscountCodes = () => {
     e.preventDefault();
     
     // Validation
-    if (!formData.code || !formData.description || !formData.value) {
+    if (!formData.code || !formData.description || (!formData.value && formData.type !== 'free_shipping')) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields.",
@@ -118,13 +121,14 @@ const AdminDiscountCodes = () => {
       code: formData.code.toUpperCase(),
       description: formData.description,
       type: formData.type,
-      value: parseFloat(formData.value),
+      value: formData.type === 'free_shipping' ? 0 : parseFloat(formData.value),
       minimumOrder: parseFloat(formData.minimumOrder) || 0,
       maxUses: parseInt(formData.maxUses) || 0,
       currentUses: editingCode ? editingCode.currentUses : 0,
       startDate: formData.startDate,
       endDate: formData.endDate,
       isActive: formData.isActive,
+      isStackable: formData.isStackable,
       createdAt: editingCode ? editingCode.createdAt : new Date().toISOString()
     };
 
@@ -156,12 +160,13 @@ const AdminDiscountCodes = () => {
       code: code.code,
       description: code.description,
       type: code.type,
-      value: code.value.toString(),
+      value: code.type === 'free_shipping' ? '' : code.value.toString(),
       minimumOrder: code.minimumOrder.toString(),
       maxUses: code.maxUses.toString(),
       startDate: code.startDate,
       endDate: code.endDate,
-      isActive: code.isActive
+      isActive: code.isActive,
+      isStackable: code.isStackable || false
     });
     setIsDialogOpen(true);
   };
@@ -190,6 +195,7 @@ const AdminDiscountCodes = () => {
   };
 
   const formatValue = (type: string, value: number) => {
+    if (type === 'free_shipping') return 'Free Shipping';
     return type === 'percentage' ? `${value}%` : `£${value.toFixed(2)}`;
   };
 
@@ -250,6 +256,7 @@ const AdminDiscountCodes = () => {
                     <SelectContent>
                       <SelectItem value="percentage">Percentage (%)</SelectItem>
                       <SelectItem value="fixed">Fixed Amount (£)</SelectItem>
+                      <SelectItem value="free_shipping">Free Shipping</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -267,21 +274,23 @@ const AdminDiscountCodes = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="value">
-                    {formData.type === 'percentage' ? 'Percentage (%)' : 'Amount (£)'} *
-                  </Label>
-                  <Input
-                    id="value"
-                    type="number"
-                    step={formData.type === 'percentage' ? '1' : '0.01'}
-                    min="0"
-                    max={formData.type === 'percentage' ? '100' : undefined}
-                    value={formData.value}
-                    onChange={(e) => setFormData(prev => ({ ...prev, value: e.target.value }))}
-                    placeholder={formData.type === 'percentage' ? '20' : '10.00'}
-                  />
-                </div>
+                {formData.type !== 'free_shipping' && (
+                  <div>
+                    <Label htmlFor="value">
+                      {formData.type === 'percentage' ? 'Percentage (%)' : 'Amount (£)'} *
+                    </Label>
+                    <Input
+                      id="value"
+                      type="number"
+                      step={formData.type === 'percentage' ? '1' : '0.01'}
+                      min="0"
+                      max={formData.type === 'percentage' ? '100' : undefined}
+                      value={formData.value}
+                      onChange={(e) => setFormData(prev => ({ ...prev, value: e.target.value }))}
+                      placeholder={formData.type === 'percentage' ? '20' : '10.00'}
+                    />
+                  </div>
+                )}
                 <div>
                   <Label htmlFor="minimumOrder">Minimum Order (£)</Label>
                   <Input
@@ -308,15 +317,27 @@ const AdminDiscountCodes = () => {
                     placeholder="100"
                   />
                 </div>
-                <div className="flex items-center space-x-2 pt-8">
-                  <input
-                    type="checkbox"
-                    id="isActive"
-                    checked={formData.isActive}
-                    onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
-                    className="rounded"
-                  />
-                  <Label htmlFor="isActive">Active</Label>
+                <div className="space-y-4 pt-4">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="isActive"
+                      checked={formData.isActive}
+                      onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                      className="rounded"
+                    />
+                    <Label htmlFor="isActive">Active</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="isStackable"
+                      checked={formData.isStackable}
+                      onChange={(e) => setFormData(prev => ({ ...prev, isStackable: e.target.checked }))}
+                      className="rounded"
+                    />
+                    <Label htmlFor="isStackable">Stackable with other discounts</Label>
+                  </div>
                 </div>
               </div>
 
@@ -430,6 +451,9 @@ const AdminDiscountCodes = () => {
                         )}
                         {isNotStarted(code.startDate) && (
                           <Badge variant="outline">Not Started</Badge>
+                        )}
+                        {code.isStackable && (
+                          <Badge variant="secondary">Stackable</Badge>
                         )}
                       </div>
                       

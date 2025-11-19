@@ -148,25 +148,30 @@ const Navigation = () => {
 
       {/* Slide-out panel (from the left) */}
       <aside
-        className={`fixed top-0 left-0 h-full w-[85%] max-w-xs bg-white dark:bg-gray-900 z-50 shadow-xl transform transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed top-0 left-0 h-full w-[85%] max-w-xs border-r border-gray-200 z-50 shadow-2xl transform transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`}
+        style={{ 
+          backgroundColor: '#ffffff',
+          opacity: 1,
+          backdropFilter: 'none'
+        }}
         aria-hidden={!open}
         role="dialog"
         aria-modal={open}
       >
-        <div ref={panelRef} className="flex items-center justify-between p-6 border-b border-border">
+        <div ref={panelRef} className="flex items-center justify-between p-6 border-b border-gray-200">
           <Link to="/" onClick={() => setOpen(false)} className="flex items-center">
             <img src={nazLogo} alt="NAZ" className="h-8 w-auto" />
           </Link>
-          <button aria-label="Close menu" onClick={() => setOpen(false)} className="p-2 rounded-md hover:bg-secondary/40">
+          <button aria-label="Close menu" onClick={() => setOpen(false)} className="p-2 rounded-md hover:bg-gray-100 text-gray-700">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <nav className="p-4 space-y-4">
-          <Link style={{ ['--i' as any]: 0 }} onClick={() => setOpen(false)} to="/" className="menu-item block text-lg font-medium">Home</Link>
-          <Link style={{ ['--i' as any]: 1 }} onClick={() => setOpen(false)} to="/shop" className="menu-item block text-lg font-medium">Shop</Link>
-          <Link style={{ ['--i' as any]: 2 }} onClick={() => setOpen(false)} to="/submit" className="menu-item block text-lg font-medium">Submit for Grading</Link>
-          <Link style={{ ['--i' as any]: 3 }} onClick={() => setOpen(false)} to="/verify" className="menu-item block text-lg font-medium">Verify Card</Link>
+          <Link style={{ ['--i' as any]: 0 }} onClick={() => setOpen(false)} to="/" className="menu-item block text-lg font-medium text-gray-900 hover:text-blue-600">Home</Link>
+          <Link style={{ ['--i' as any]: 1 }} onClick={() => setOpen(false)} to="/shop" className="menu-item block text-lg font-medium text-gray-900 hover:text-blue-600">Shop</Link>
+          <Link style={{ ['--i' as any]: 2 }} onClick={() => setOpen(false)} to="/submit" className="menu-item block text-lg font-medium text-gray-900 hover:text-blue-600">Submit for Grading</Link>
+          <Link style={{ ['--i' as any]: 3 }} onClick={() => setOpen(false)} to="/verify" className="menu-item block text-lg font-medium text-gray-900 hover:text-blue-600">Verify Card</Link>
 
           <div className="mt-4 menu-item" style={{ ['--i' as any]: 4 }}>
             <Link to="/submit" onClick={() => setOpen(false)}>
@@ -174,8 +179,8 @@ const Navigation = () => {
             </Link>
           </div>
 
-          <div className="mt-6 border-t border-border pt-4 menu-item" style={{ ['--i' as any]: 5 }}>
-            <Link onClick={() => setOpen(false)} to="/cart" className="flex items-center gap-3">
+          <div className="mt-6 border-t border-gray-200 pt-4 menu-item" style={{ ['--i' as any]: 5 }}>
+            <Link onClick={() => setOpen(false)} to="/cart" className="flex items-center gap-3 text-gray-900 hover:text-blue-600">
               <ShoppingCart className="w-5 h-5" />
               <span>Cart</span>
               {totalItems > 0 && (

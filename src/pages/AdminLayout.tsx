@@ -44,14 +44,15 @@ const AdminLayout = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: '#f5f1f0' }}>
       {/* Mobile header */}
-      <div className="lg:hidden bg-white shadow-sm border-b px-4 py-3 flex items-center justify-between relative z-30">
-        <h1 className="text-lg font-semibold">NAZ TCG Admin</h1>
+      <div className="lg:hidden shadow-sm border-b px-4 py-3 flex items-center justify-between relative z-30" style={{ backgroundColor: '#B2493D', borderColor: '#8B3428' }}>
+        <h1 className="text-lg font-semibold text-white">NAZ TCG Admin</h1>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="text-white hover:bg-red-700"
         >
           <Menu className="h-5 w-5" />
         </Button>
@@ -60,23 +61,24 @@ const AdminLayout = () => {
       <div className="flex">
         {/* Sidebar */}
         <aside className={`
-          fixed inset-y-0 left-0 z-[60] w-64 bg-white shadow-2xl border-r transform transition-transform duration-300 ease-in-out
+          fixed inset-y-0 left-0 z-[60] w-64 shadow-2xl border-r transform transition-transform duration-300 ease-in-out
           lg:translate-x-0 lg:static lg:inset-0 lg:z-auto
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        `}>
+        `}
+        style={{ backgroundColor: '#B2493D', borderColor: '#8B3428' }}>
           <div className="flex flex-col h-full">
             {/* Header */}
-            <div className="p-6 border-b">
+            <div className="p-6 border-b" style={{ borderColor: '#8B3428' }}>
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">NAZ TCG Admin</h1>
-                  <p className="text-sm text-gray-500 mt-1">Trading Card Management</p>
+                  <h1 className="text-xl font-bold text-white">NAZ TCG Admin</h1>
+                  <p className="text-sm text-red-100 mt-1">Trading Card Management</p>
                 </div>
                 {/* Close button for mobile */}
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="lg:hidden"
+                  className="lg:hidden text-white hover:bg-red-700"
                   onClick={() => setSidebarOpen(false)}
                 >
                   <X className="h-4 w-4" />
@@ -98,8 +100,8 @@ const AdminLayout = () => {
                     className={`
                       flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors
                       ${isActive 
-                        ? 'bg-blue-50 text-blue-700 border border-blue-200' 
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ? 'bg-red-700 text-white border border-red-600' 
+                        : 'text-red-100 hover:bg-red-700 hover:text-white'
                       }
                     `}
                     onClick={() => setSidebarOpen(false)}
@@ -112,10 +114,10 @@ const AdminLayout = () => {
             </nav>
 
             {/* Footer */}
-            <div className="p-4 border-t">
+            <div className="p-4 border-t" style={{ borderColor: '#8B3428' }}>
               <Button
                 variant="ghost"
-                className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                className="w-full justify-start text-red-100 hover:text-white hover:bg-red-700"
                 onClick={handleLogout}
               >
                 <LogOut className="h-5 w-5 mr-3" />

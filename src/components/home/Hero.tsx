@@ -16,9 +16,9 @@ const Hero = () => {
           <div className="hidden md:block md:w-[35%]" />
           <div className="w-full md:w-[65%] text-right text-primary-foreground bg-transparent">
             <section className="mb-8">
-              <div className="inline-flex items-center gap-2 bg-accent/20 px-4 py-2 rounded-full mb-6 backdrop-blur-sm">
-                <Shield className="w-4 h-4 text-accent" />
-                <span className="text-sm font-medium text-accent">Professional Card Authentication</span>
+              <div className="inline-flex items-center gap-3 bg-gradient-to-r from-orange-500/90 to-red-500/90 px-6 py-3 rounded-full mb-6 backdrop-blur-sm shadow-lg border-2 border-white/30 animate-pulse hover:animate-none transition-all duration-300 hover:shadow-xl hover:scale-105">
+                <Shield className="w-5 h-5 text-white drop-shadow-lg" />
+                <span className="text-base font-bold text-white drop-shadow-lg tracking-wide">✨ PROFESSIONAL CARD AUTHENTICATION ✨</span>
               </div>
 
               <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">

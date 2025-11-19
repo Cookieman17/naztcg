@@ -61,7 +61,7 @@ const Navigation = () => {
   }, [open]);
 
   return (
-  <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border" style={{ backgroundColor: '#B3493D' }}>
+  <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border" style={{ backgroundColor: '#B2493D' }}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Mobile: Hamburger on left, Logo centered */}

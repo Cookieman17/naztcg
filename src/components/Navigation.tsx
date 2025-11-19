@@ -154,8 +154,8 @@ const Navigation = () => {
       <aside
         className={`fixed top-0 left-0 h-full w-[85%] max-w-xs z-50 transform transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`}
         style={{ 
-          backgroundColor: '#ffffff',
-          borderRight: '1px solid #e5e7eb',
+          backgroundColor: '#dc2626',
+          borderRight: '1px solid #b91c1c',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
           zIndex: 9999
         }}
@@ -166,7 +166,10 @@ const Navigation = () => {
         <div 
           ref={panelRef} 
           className="flex items-center justify-between p-6"
-          style={{ borderBottom: '1px solid #e5e7eb' }}
+          style={{ 
+            borderBottom: '1px solid #b91c1c',
+            backgroundColor: '#dc2626'
+          }}
         >
           <Link to="/" onClick={() => setOpen(false)} className="flex items-center">
             <img src={nazLogo} alt="NAZ" className="h-8 w-auto" />
@@ -174,64 +177,64 @@ const Navigation = () => {
           <button 
             aria-label="Close menu" 
             onClick={() => setOpen(false)} 
-            className="p-2 rounded-md hover:bg-gray-100"
-            style={{ color: '#374151' }}
+            className="p-2 rounded-md hover:bg-red-700"
+            style={{ color: '#ffffff' }}
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <nav className="p-4 space-y-4" style={{ backgroundColor: '#ffffff' }}>
+        <nav className="p-4 space-y-4" style={{ backgroundColor: '#dc2626' }}>
           <Link 
-            style={{ color: '#111827', textDecoration: 'none' }} 
+            style={{ color: '#ffffff', textDecoration: 'none' }} 
             onClick={() => setOpen(false)} 
             to="/" 
-            className="menu-item block text-lg font-medium hover:text-blue-600 py-2"
+            className="menu-item block text-lg font-medium hover:bg-red-700 py-3 px-2 rounded-md transition-colors"
           >
             Home
           </Link>
           <Link 
-            style={{ color: '#111827', textDecoration: 'none' }} 
+            style={{ color: '#ffffff', textDecoration: 'none' }} 
             onClick={() => setOpen(false)} 
             to="/shop" 
-            className="menu-item block text-lg font-medium hover:text-blue-600 py-2"
+            className="menu-item block text-lg font-medium hover:bg-red-700 py-3 px-2 rounded-md transition-colors"
           >
             Shop
           </Link>
           <Link 
-            style={{ color: '#111827', textDecoration: 'none' }} 
+            style={{ color: '#ffffff', textDecoration: 'none' }} 
             onClick={() => setOpen(false)} 
             to="/submit" 
-            className="menu-item block text-lg font-medium hover:text-blue-600 py-2"
+            className="menu-item block text-lg font-medium hover:bg-red-700 py-3 px-2 rounded-md transition-colors"
           >
             Submit for Grading
           </Link>
           <Link 
-            style={{ color: '#111827', textDecoration: 'none' }} 
+            style={{ color: '#ffffff', textDecoration: 'none' }} 
             onClick={() => setOpen(false)} 
             to="/verify" 
-            className="menu-item block text-lg font-medium hover:text-blue-600 py-2"
+            className="menu-item block text-lg font-medium hover:bg-red-700 py-3 px-2 rounded-md transition-colors"
           >
             Verify Card
           </Link>
 
-          <div className="mt-4 menu-item py-2">
+          <div className="mt-4 menu-item py-2 px-2">
             <Link to="/submit" onClick={() => setOpen(false)}>
-              <Button variant="premium" size="sm">Get Started</Button>
+              <Button variant="premium" size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">Get Started</Button>
             </Link>
           </div>
 
-          <div className="mt-6 pt-4 menu-item" style={{ borderTop: '1px solid #e5e7eb' }}>
+          <div className="mt-6 pt-4 menu-item px-2" style={{ borderTop: '1px solid #b91c1c' }}>
             <Link 
               onClick={() => setOpen(false)} 
               to="/cart" 
-              className="flex items-center gap-3 py-2 hover:text-blue-600"
-              style={{ color: '#111827', textDecoration: 'none' }}
+              className="flex items-center gap-3 py-3 rounded-md hover:bg-red-700 transition-colors"
+              style={{ color: '#ffffff', textDecoration: 'none' }}
             >
               <ShoppingCart className="w-5 h-5" />
               <span>Cart</span>
               {totalItems > 0 && (
-                <span className="ml-auto bg-red-600 text-white text-xs font-semibold rounded-full px-2 py-1">{totalItems}</span>
+                <span className="ml-auto bg-white text-red-600 text-xs font-semibold rounded-full px-2 py-1">{totalItems}</span>
               )}
             </Link>
           </div>

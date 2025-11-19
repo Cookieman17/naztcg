@@ -141,50 +141,97 @@ const Navigation = () => {
 
       {/* Overlay */}
       <div
-        className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 transition-opacity duration-300 ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        style={{
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          zIndex: 9998
+        }}
         onClick={() => setOpen(false)}
         aria-hidden={!open}
       />
 
       {/* Slide-out panel (from the left) */}
       <aside
-        className={`fixed top-0 left-0 h-full w-[85%] max-w-xs border-r border-gray-200 z-50 shadow-2xl transform transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed top-0 left-0 h-full w-[85%] max-w-xs z-50 transform transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`}
         style={{ 
           backgroundColor: '#ffffff',
-          opacity: 1,
-          backdropFilter: 'none'
+          borderRight: '1px solid #e5e7eb',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          zIndex: 9999
         }}
         aria-hidden={!open}
         role="dialog"
         aria-modal={open}
       >
-        <div ref={panelRef} className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div 
+          ref={panelRef} 
+          className="flex items-center justify-between p-6"
+          style={{ borderBottom: '1px solid #e5e7eb' }}
+        >
           <Link to="/" onClick={() => setOpen(false)} className="flex items-center">
             <img src={nazLogo} alt="NAZ" className="h-8 w-auto" />
           </Link>
-          <button aria-label="Close menu" onClick={() => setOpen(false)} className="p-2 rounded-md hover:bg-gray-100 text-gray-700">
+          <button 
+            aria-label="Close menu" 
+            onClick={() => setOpen(false)} 
+            className="p-2 rounded-md hover:bg-gray-100"
+            style={{ color: '#374151' }}
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <nav className="p-4 space-y-4">
-          <Link style={{ ['--i' as any]: 0 }} onClick={() => setOpen(false)} to="/" className="menu-item block text-lg font-medium text-gray-900 hover:text-blue-600">Home</Link>
-          <Link style={{ ['--i' as any]: 1 }} onClick={() => setOpen(false)} to="/shop" className="menu-item block text-lg font-medium text-gray-900 hover:text-blue-600">Shop</Link>
-          <Link style={{ ['--i' as any]: 2 }} onClick={() => setOpen(false)} to="/submit" className="menu-item block text-lg font-medium text-gray-900 hover:text-blue-600">Submit for Grading</Link>
-          <Link style={{ ['--i' as any]: 3 }} onClick={() => setOpen(false)} to="/verify" className="menu-item block text-lg font-medium text-gray-900 hover:text-blue-600">Verify Card</Link>
+        <nav className="p-4 space-y-4" style={{ backgroundColor: '#ffffff' }}>
+          <Link 
+            style={{ color: '#111827', textDecoration: 'none' }} 
+            onClick={() => setOpen(false)} 
+            to="/" 
+            className="menu-item block text-lg font-medium hover:text-blue-600 py-2"
+          >
+            Home
+          </Link>
+          <Link 
+            style={{ color: '#111827', textDecoration: 'none' }} 
+            onClick={() => setOpen(false)} 
+            to="/shop" 
+            className="menu-item block text-lg font-medium hover:text-blue-600 py-2"
+          >
+            Shop
+          </Link>
+          <Link 
+            style={{ color: '#111827', textDecoration: 'none' }} 
+            onClick={() => setOpen(false)} 
+            to="/submit" 
+            className="menu-item block text-lg font-medium hover:text-blue-600 py-2"
+          >
+            Submit for Grading
+          </Link>
+          <Link 
+            style={{ color: '#111827', textDecoration: 'none' }} 
+            onClick={() => setOpen(false)} 
+            to="/verify" 
+            className="menu-item block text-lg font-medium hover:text-blue-600 py-2"
+          >
+            Verify Card
+          </Link>
 
-          <div className="mt-4 menu-item" style={{ ['--i' as any]: 4 }}>
+          <div className="mt-4 menu-item py-2">
             <Link to="/submit" onClick={() => setOpen(false)}>
               <Button variant="premium" size="sm">Get Started</Button>
             </Link>
           </div>
 
-          <div className="mt-6 border-t border-gray-200 pt-4 menu-item" style={{ ['--i' as any]: 5 }}>
-            <Link onClick={() => setOpen(false)} to="/cart" className="flex items-center gap-3 text-gray-900 hover:text-blue-600">
+          <div className="mt-6 pt-4 menu-item" style={{ borderTop: '1px solid #e5e7eb' }}>
+            <Link 
+              onClick={() => setOpen(false)} 
+              to="/cart" 
+              className="flex items-center gap-3 py-2 hover:text-blue-600"
+              style={{ color: '#111827', textDecoration: 'none' }}
+            >
               <ShoppingCart className="w-5 h-5" />
               <span>Cart</span>
               {totalItems > 0 && (
-                <span className="ml-auto bg-destructive text-destructive-foreground text-xs font-semibold rounded-full px-2">{totalItems}</span>
+                <span className="ml-auto bg-red-600 text-white text-xs font-semibold rounded-full px-2 py-1">{totalItems}</span>
               )}
             </Link>
           </div>

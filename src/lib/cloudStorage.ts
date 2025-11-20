@@ -1,16 +1,18 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Supabase configuration
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co';
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
+// Supabase configuration - HARDCODED for reliability
+const SUPABASE_URL = 'https://elihmzzheuwmjwdqbufy.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsaWhtenpoZXV3bWp3ZHFidWZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MzY4ODcsImV4cCI6MjA3OTIxMjg4N30.ye9iiYcEwdmtTdkibhYrTfrM0NsYRCAsA2VDuTE9sq4';
 
 // Create Supabase client
-let supabase: SupabaseClient | null = null;
+let supabase: SupabaseClient;
 
 try {
   supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  console.log('✅ Supabase connected:', SUPABASE_URL);
 } catch (error) {
-  console.warn('Supabase not configured, falling back to localStorage only');
+  console.error('❌ Supabase connection failed:', error);
+  throw error;
 }
 
 export interface Product {
@@ -74,89 +76,95 @@ class CloudStorageService {
   }
 
   private isOnline(): boolean {
-    return navigator.onLine && supabase !== null;
+    return true; // Always try to use cloud storage
   }
 
   // Generic methods for any data type
   async saveData<T>(tableName: string, data: T[], localStorageKey: string): Promise<boolean> {
     try {
-      // Always save to localStorage first (for offline access)
-      localStorage.setItem(localStorageKey, JSON.stringify(data));
+      console.log(`🔄 Saving ${data.length} items to ${tableName}`);
+      
+      // ALWAYS save to cloud database first
+      const { error } = await supabase
+        .from(tableName)
+        .upsert(data, { onConflict: 'id' });
 
-      // If online and Supabase is available, sync to cloud
-      if (this.isOnline() && supabase) {
-        // Create table if it doesn't exist (for demo purposes)
-        const { error } = await supabase
-          .from(tableName)
-          .upsert(data, { onConflict: 'id' });
-
-        if (error) {
-          console.error(`Error syncing ${tableName} to cloud:`, error);
-          // Don't fail completely - we still have localStorage
-        }
+      if (error) {
+        console.error(`❌ Failed to save ${tableName} to cloud:`, error);
+        throw error; // Fail if cloud save fails
       }
+
+      console.log(`✅ Successfully saved ${tableName} to cloud database`);
+
+      // Also save to localStorage as backup
+      localStorage.setItem(localStorageKey, JSON.stringify(data));
 
       // Trigger update events
       window.dispatchEvent(new CustomEvent(`${tableName}Updated`));
       return true;
     } catch (error) {
-      console.error(`Error saving ${tableName}:`, error);
-      return false;
+      console.error(`❌ Error saving ${tableName}:`, error);
+      throw error; // Don't silently fail
     }
   }
 
   async loadData<T>(tableName: string, localStorageKey: string): Promise<T[]> {
     try {
-      // If online and Supabase is available, try to load from cloud first
-      if (this.isOnline() && supabase) {
-        const { data: cloudData, error } = await supabase
-          .from(tableName)
-          .select('*')
-          .order('updatedAt', { ascending: false });
+      console.log(`🔄 Loading ${tableName} from cloud database`);
+      
+      // ALWAYS load from cloud database first
+      const { data: cloudData, error } = await supabase
+        .from(tableName)
+        .select('*')
+        .order('updatedAt', { ascending: false });
 
-        if (!error && cloudData && cloudData.length > 0) {
-          // Update localStorage with latest cloud data
-          localStorage.setItem(localStorageKey, JSON.stringify(cloudData));
-          return cloudData as T[];
-        }
+      if (error) {
+        console.error(`❌ Failed to load ${tableName} from cloud:`, error);
+        throw error;
       }
 
-      // Fallback to localStorage
-      const localData = localStorage.getItem(localStorageKey);
-      return localData ? JSON.parse(localData) : [];
+      console.log(`✅ Loaded ${cloudData?.length || 0} items from ${tableName} cloud database`);
+
+      // Update localStorage with latest cloud data
+      localStorage.setItem(localStorageKey, JSON.stringify(cloudData || []));
+      return (cloudData as T[]) || [];
     } catch (error) {
-      console.error(`Error loading ${tableName}:`, error);
-      // Final fallback to localStorage
+      console.error(`❌ Error loading ${tableName}:`, error);
+      // Only fallback to localStorage if cloud completely fails
       const localData = localStorage.getItem(localStorageKey);
+      console.log(`⚠️ Falling back to localStorage for ${tableName}`);
       return localData ? JSON.parse(localData) : [];
     }
   }
 
   async deleteData(tableName: string, id: string, localStorageKey: string): Promise<boolean> {
     try {
-      // Delete from localStorage
+      console.log(`🗑️ Deleting ${id} from ${tableName}`);
+      
+      // Delete from cloud database first
+      const { error } = await supabase
+        .from(tableName)
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error(`❌ Failed to delete ${id} from ${tableName}:`, error);
+        throw error;
+      }
+
+      console.log(`✅ Successfully deleted ${id} from ${tableName} cloud database`);
+
+      // Also delete from localStorage
       const localData = JSON.parse(localStorage.getItem(localStorageKey) || '[]');
       const updatedData = localData.filter((item: any) => item.id !== id);
       localStorage.setItem(localStorageKey, JSON.stringify(updatedData));
-
-      // If online and Supabase is available, delete from cloud
-      if (this.isOnline() && supabase) {
-        const { error } = await supabase
-          .from(tableName)
-          .delete()
-          .eq('id', id);
-
-        if (error) {
-          console.error(`Error deleting ${id} from ${tableName}:`, error);
-        }
-      }
 
       // Trigger update events
       window.dispatchEvent(new CustomEvent(`${tableName}Updated`));
       return true;
     } catch (error) {
-      console.error(`Error deleting from ${tableName}:`, error);
-      return false;
+      console.error(`❌ Error deleting from ${tableName}:`, error);
+      throw error;
     }
   }
 

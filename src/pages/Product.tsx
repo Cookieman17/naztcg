@@ -1,17 +1,50 @@
 import { useParams, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/home/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getProductById } from "@/lib/products";
+import { getProductById, Product as ProductType } from "@/lib/products";
 import { useCart } from "@/context/CartContext";
 
 const Product = () => {
   const params = useParams();
   const id = params.id as string;
-  const product = getProductById(id);
+  const [product, setProduct] = useState<ProductType | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadProduct = async () => {
+      try {
+        const foundProduct = await getProductById(id);
+        setProduct(foundProduct);
+      } catch (error) {
+        console.error('Error loading product:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProduct();
+  }, [id]);
 
   const { addToCart } = useCart();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <Navigation />
+        <main className="pt-24">
+          <div className="container mx-auto px-4 py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-lg">Loading product...</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   if (!product) {
     return (

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { cloudStorage } from "@/lib/cloudStorage";
 import { 
   Search, 
   Plus, 
@@ -14,7 +15,10 @@ import {
   Package,
   DollarSign,
   Eye,
-  AlertTriangle
+  AlertTriangle,
+  Cloud,
+  Wifi,
+  WifiOff
 } from "lucide-react";
 
 interface Product {
@@ -40,6 +44,9 @@ const AdminProducts = () => {
   const [seriesFilter, setSeriesFilter] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [storageStatus, setStorageStatus] = useState({ cloud: false, local: true, message: "" });
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -55,10 +62,36 @@ const AdminProducts = () => {
   const [imagePreview, setImagePreview] = useState<string>("");
 
   useEffect(() => {
-    // Load products from localStorage
-    const savedProducts = JSON.parse(localStorage.getItem("adminProducts") || "[]");
-    setProducts(savedProducts);
-    setFilteredProducts(savedProducts);
+    // Load products from cloud storage
+    const loadProducts = async () => {
+      setLoading(true);
+      try {
+        const savedProducts = await cloudStorage.loadProducts();
+        setProducts(savedProducts);
+        setFilteredProducts(savedProducts);
+        
+        // Update storage status
+        setStorageStatus(cloudStorage.getStorageStatus());
+      } catch (error) {
+        console.error('Error loading products:', error);
+        // Fallback to localStorage
+        const localProducts = JSON.parse(localStorage.getItem("adminProducts") || "[]");
+        setProducts(localProducts);
+        setFilteredProducts(localProducts);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+
+    // Listen for product updates from other tabs/devices
+    const handleProductsUpdate = () => {
+      loadProducts();
+    };
+
+    window.addEventListener('productsUpdated', handleProductsUpdate);
+    return () => window.removeEventListener('productsUpdated', handleProductsUpdate);
   }, []);
 
   useEffect(() => {
@@ -150,39 +183,49 @@ const AdminProducts = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaving(true);
     
-    const productData: Product = {
-      id: editingProduct?.id || Date.now().toString(),
-      name: formData.name,
-      description: formData.description,
-      price: parseFloat(formData.price),
-      category: formData.category,
-      series: formData.series,
-      rarity: formData.rarity,
-      stock: parseInt(formData.stock),
-      image: formData.image || imagePreview || "/api/placeholder/300/200",
-      status: formData.status,
-      createdAt: editingProduct?.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+    try {
+      const productData: Product = {
+        id: editingProduct?.id || Date.now().toString(),
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        category: formData.category,
+        series: formData.series,
+        rarity: formData.rarity,
+        stock: parseInt(formData.stock),
+        image: formData.image || imagePreview || "/api/placeholder/300/200",
+        status: formData.status,
+        createdAt: editingProduct?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
 
-    let updatedProducts;
-    if (editingProduct) {
-      updatedProducts = products.map(p => p.id === editingProduct.id ? productData : p);
-    } else {
-      updatedProducts = [...products, productData];
+      let updatedProducts;
+      if (editingProduct) {
+        updatedProducts = products.map(p => p.id === editingProduct.id ? productData : p);
+      } else {
+        updatedProducts = [...products, productData];
+      }
+
+      // Save to cloud storage (which also updates localStorage)
+      await cloudStorage.saveProducts(updatedProducts);
+      
+      setProducts(updatedProducts);
+      
+      // Update storage status
+      setStorageStatus(cloudStorage.getStorageStatus());
+      
+      resetForm();
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error('Error saving product:', error);
+      alert('Error saving product. Please try again.');
+    } finally {
+      setSaving(false);
     }
-
-    setProducts(updatedProducts);
-    localStorage.setItem("adminProducts", JSON.stringify(updatedProducts));
-    
-    // Notify shop page of product updates
-    window.dispatchEvent(new CustomEvent('productsUpdated'));
-    
-    resetForm();
-    setIsDialogOpen(false);
   };
 
   const handleEdit = (product: Product) => {
@@ -202,14 +245,23 @@ const AdminProducts = () => {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (productId: string) => {
+  const handleDelete = async (productId: string) => {
     if (confirm("Are you sure you want to delete this product?")) {
-      const updatedProducts = products.filter(p => p.id !== productId);
-      setProducts(updatedProducts);
-      localStorage.setItem("adminProducts", JSON.stringify(updatedProducts));
-      
-      // Notify shop page of product updates
-      window.dispatchEvent(new CustomEvent('productsUpdated'));
+      try {
+        setSaving(true);
+        await cloudStorage.deleteProduct(productId);
+        
+        const updatedProducts = products.filter(p => p.id !== productId);
+        setProducts(updatedProducts);
+        
+        // Update storage status
+        setStorageStatus(cloudStorage.getStorageStatus());
+      } catch (error) {
+        console.error('Error deleting product:', error);
+        alert('Error deleting product. Please try again.');
+      } finally {
+        setSaving(false);
+      }
     }
   };
 
@@ -232,11 +284,26 @@ const AdminProducts = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Products</h1>
-          <p className="text-gray-600 mt-2">Manage your product catalog</p>
+          <div className="flex items-center gap-3 mt-2">
+            <p className="text-gray-600">Manage your product catalog</p>
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full text-sm">
+              {storageStatus.cloud ? (
+                <>
+                  <Cloud className="h-4 w-4 text-green-600" />
+                  <span className="text-green-600 font-medium">Synced across devices</span>
+                </>
+              ) : (
+                <>
+                  <WifiOff className="h-4 w-4 text-yellow-600" />
+                  <span className="text-yellow-600 font-medium">Local storage only</span>
+                </>
+              )}
+            </div>
+          </div>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={resetForm} className="gap-2">
+            <Button onClick={resetForm} className="gap-2" disabled={loading || saving}>
               <Plus className="h-4 w-4" />
               Add Product
             </Button>
@@ -402,11 +469,11 @@ const AdminProducts = () => {
               </div>
 
               <div className="flex justify-end gap-3 pt-4">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} disabled={saving}>
                   Cancel
                 </Button>
-                <Button type="submit">
-                  {editingProduct ? 'Update Product' : 'Create Product'}
+                <Button type="submit" disabled={saving}>
+                  {saving ? 'Saving...' : editingProduct ? 'Update Product' : 'Create Product'}
                 </Button>
               </div>
             </form>
@@ -459,8 +526,14 @@ const AdminProducts = () => {
       </Card>
 
       {/* Products Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProducts.length > 0 ? (
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-500">Loading products...</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredProducts.length > 0 ? (
           filteredProducts.map((product) => {
             const stockStatus = getStockStatus(product.stock);
             return (
@@ -509,6 +582,7 @@ const AdminProducts = () => {
                         variant="outline"
                         size="sm"
                         onClick={() => handleEdit(product)}
+                        disabled={saving}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -517,6 +591,7 @@ const AdminProducts = () => {
                         size="sm"
                         onClick={() => handleDelete(product.id)}
                         className="text-red-600 hover:text-red-700"
+                        disabled={saving}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -549,7 +624,8 @@ const AdminProducts = () => {
             </Card>
           </div>
         )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

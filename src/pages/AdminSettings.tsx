@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import StorageStatusComponent from "@/components/StorageStatus";
 import { 
   Settings as SettingsIcon, 
   Store, 
@@ -159,6 +160,9 @@ const AdminSettings = () => {
           </AlertDescription>
         </Alert>
       )}
+
+      {/* Storage Status */}
+      <StorageStatusComponent showDetailed={true} />
 
       {/* Store Information */}
       <Card>

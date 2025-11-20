@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
 import Product from "./pages/Product";
@@ -24,12 +25,18 @@ import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
 import StripeProvider from "@/components/StripeProvider";
 import { useAdminIntegration } from "@/lib/adminIntegration";
+import { initializeDataPersistence } from "@/lib/dataPersistence";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   // Initialize admin integration
   useAdminIntegration();
+  
+  // Initialize data persistence system
+  useEffect(() => {
+    initializeDataPersistence();
+  }, []);
   
   return (
   <QueryClientProvider client={queryClient}>

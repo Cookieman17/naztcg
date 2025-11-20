@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Filter, Package } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getProducts, Product } from "@/lib/products";
+import { cloudStorage } from "@/lib/cloudStorage";
 
 const Shop = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,43 +21,72 @@ const Shop = () => {
 
   // Load products and categories on component mount and listen for updates
   useEffect(() => {
-    const loadProductsAndCategories = () => {
-      // Load all admin products (not just trading cards for category extraction)
-      const allAdminProducts = JSON.parse(localStorage.getItem('adminProducts') || '[]');
-      
-      // Extract unique categories from admin products that are active and have stock
-      const uniqueCategories = [...new Set(
-        allAdminProducts
-          .filter((product: any) => product.status === 'active' && product.stock > 0)
-          .map((product: any) => product.category)
-          .filter(Boolean)
-      )];
-      setCategories(uniqueCategories);
+    const loadProductsAndCategories = async () => {
+      setLoading(true);
+      try {
+        // Load all admin products from cloud storage
+        const allAdminProducts = await cloudStorage.loadProducts();
+        
+        // Extract unique categories from admin products that are active and have stock
+        const uniqueCategories = [...new Set(
+          allAdminProducts
+            .filter((product: any) => product.status === 'active' && product.stock > 0)
+            .map((product: any) => product.category)
+            .filter(Boolean)
+        )];
+        setCategories(uniqueCategories);
 
-      // Load filtered products for display
-      const displayProducts = allAdminProducts
-        .filter((product: any) => 
-          product.status === 'active' &&
-          product.stock > 0
-        )
-        .map((product: any) => ({
-          id: product.id,
-          name: product.name,
-          set: product.series || 'Unknown Set',
-          grade: null,
-          price: product.price,
-          image: product.image || '/placeholder.svg',
-          serialNumber: null,
-          description: product.description,
-          series: product.series,
-          rarity: product.rarity,
-          category: product.category,
-          stock: product.stock,
-          status: product.status
-        }));
-      
-      setProducts(displayProducts);
-      setLoading(false);
+        // Load filtered products for display
+        const displayProducts = allAdminProducts
+          .filter((product: any) => 
+            product.status === 'active' &&
+            product.stock > 0
+          )
+          .map((product: any) => ({
+            id: product.id,
+            name: product.name,
+            set: product.series || 'Unknown Set',
+            grade: null,
+            price: product.price,
+            image: product.image || '/placeholder.svg',
+            serialNumber: null,
+            description: product.description,
+            series: product.series,
+            rarity: product.rarity,
+            category: product.category,
+            stock: product.stock,
+            status: product.status
+          }));
+        
+        setProducts(displayProducts);
+      } catch (error) {
+        console.error('Error loading products:', error);
+        // Fallback to localStorage for backwards compatibility
+        const localProducts = JSON.parse(localStorage.getItem('adminProducts') || '[]');
+        const displayProducts = localProducts
+          .filter((product: any) => 
+            product.status === 'active' &&
+            product.stock > 0
+          )
+          .map((product: any) => ({
+            id: product.id,
+            name: product.name,
+            set: product.series || 'Unknown Set',
+            grade: null,
+            price: product.price,
+            image: product.image || '/placeholder.svg',
+            serialNumber: null,
+            description: product.description,
+            series: product.series,
+            rarity: product.rarity,
+            category: product.category,
+            stock: product.stock,
+            status: product.status
+          }));
+        setProducts(displayProducts);
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadProductsAndCategories();

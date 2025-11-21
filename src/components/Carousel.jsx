@@ -52,8 +52,9 @@ export default function Carousel({
   loop = false,
   round = false
 }) {
-  const containerPadding = 16;
-  const itemWidth = baseWidth - containerPadding * 2;
+  const containerPadding = round ? 40 : 16; // More padding for circular mode to ensure proper fit
+  const baseItemWidth = baseWidth - containerPadding * 2;
+  const itemWidth = round ? baseItemWidth * 1.15 : baseItemWidth; // 15% bigger for circular mode
   const trackItemOffset = itemWidth + GAP;
 
   const carouselItems = loop ? [...items, items[0]] : items;

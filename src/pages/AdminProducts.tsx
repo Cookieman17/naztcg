@@ -193,6 +193,7 @@ const AdminProducts = () => {
         }
       } else {
         updatedProduct = await fallbackProductService.createProduct(productData);
+        console.log('AdminProducts: Created new product:', updatedProduct);
         setProducts(prev => [...prev, updatedProduct]);
       }
       

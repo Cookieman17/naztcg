@@ -26,9 +26,11 @@ const Shop = () => {
       try {
         // Load all active products with stock from Supabase
         const result = await fallbackProductService.getProducts({
-          status: 'active',
-          inStock: true
+          status: 'active'
+          // Temporarily removed inStock: true to show all products
         });
+        
+        console.log('Shop: Loaded products from fallback service:', result);
         
         // Extract unique categories from products
         const uniqueCategories = [...new Set(
@@ -58,6 +60,17 @@ const Shop = () => {
     };
 
     loadProductsAndCategories();
+
+    // Listen for product updates from admin
+    const handleProductsUpdate = () => {
+      console.log('Shop: Product update event received, reloading...');
+      loadProductsAndCategories();
+    };
+
+    window.addEventListener('productsUpdated', handleProductsUpdate);
+    return () => {
+      window.removeEventListener('productsUpdated', handleProductsUpdate);
+    };
   }, []);
 
   const cards = products;

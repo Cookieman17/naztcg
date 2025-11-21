@@ -28,7 +28,7 @@ const Home = () => {
           </div>
           <div className="flex justify-center items-center w-full">
             <Carousel
-              baseWidth={400}
+              baseWidth={600}
               autoplay={true}
               autoplayDelay={5000}
               pauseOnHover={true}

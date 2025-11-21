@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { initializeDataPersistence } from './dataPersistence';
+import { cloudStorage } from './cloudStorage';
 
 // Admin integration utility for handling order events and data management
 export const useAdminIntegration = () => {
@@ -7,7 +8,7 @@ export const useAdminIntegration = () => {
     // Initialize data persistence system
     initializeDataPersistence();
     
-    // Initialize sample data on first load
+    // Initialize sample data on first load (async now)
     initializeSampleData();
     
     // Listen for order creation events from the payment system
@@ -99,56 +100,74 @@ export const dispatchOrderCreatedEvent = (orderData: any) => {
   window.dispatchEvent(event);
 };
 
-// Initialize sample data if none exists
-export const initializeSampleData = () => {
-  // Sample products
-  if (!localStorage.getItem('adminProducts')) {
-    const sampleProducts = [
-      {
-        id: Date.now().toString(),
-        name: 'PSA Card Grading Service',
-        description: 'Professional card grading and authentication service',
-        price: 25.00,
-        category: 'Grading',
-        series: '',
-        rarity: '',
-        stock: 100,
-        image: '/api/placeholder/300/200',
-        status: 'active',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: (Date.now() + 1).toString(),
-        name: 'BGS Card Grading Service',
-        description: 'Beckett Grading Services authentication',
-        price: 30.00,
-        category: 'Grading',
-        series: '',
-        rarity: '',
-        stock: 75,
-        image: '/api/placeholder/300/200',
-        status: 'active',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: (Date.now() + 2).toString(),
-        name: 'Card Sleeves (100 pack)',
-        description: 'Premium card protection sleeves',
-        price: 12.99,
-        category: 'Accessories',
-        series: '',
-        rarity: '',
-        stock: 50,
-        image: '/api/placeholder/300/200',
-        status: 'active',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+// Initialize sample data if none exists (disabled to prevent auto-restoration)
+export const initializeSampleData = async () => {
+  // Check both localStorage and cloud storage before creating sample data
+  const localProducts = localStorage.getItem('adminProducts');
+  
+  // Only create sample data if BOTH localStorage AND cloud are completely empty
+  // This prevents auto-restoration when admin intentionally deletes all products
+  if (!localProducts) {
+    try {
+      const cloudProducts = await cloudStorage.loadProducts();
+      
+      // If cloud also has no products, then create samples
+      if (cloudProducts.length === 0) {
+        console.log('🔧 Creating initial sample products (both local and cloud empty)');
+        const sampleProducts = [
+          {
+            id: Date.now().toString(),
+            name: 'PSA Card Grading Service',
+            description: 'Professional card grading and authentication service',
+            price: 25.00,
+            category: 'Grading',
+            series: '',
+            rarity: '',
+            stock: 100,
+            image: '/api/placeholder/300/200',
+            status: 'active',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          },
+          {
+            id: (Date.now() + 1).toString(),
+            name: 'BGS Card Grading Service',
+            description: 'Beckett Grading Services authentication',
+            price: 30.00,
+            category: 'Grading',
+            series: '',
+            rarity: '',
+            stock: 75,
+            image: '/api/placeholder/300/200',
+            status: 'active',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          },
+          {
+            id: (Date.now() + 2).toString(),
+            name: 'Card Sleeves (100 pack)',
+            description: 'Premium card protection sleeves',
+            price: 12.99,
+            category: 'Accessories',
+            series: '',
+            rarity: '',
+            stock: 50,
+            image: '/api/placeholder/300/200',
+            status: 'active',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }
+        ];
+        localStorage.setItem('adminProducts', JSON.stringify(sampleProducts));
+      } else {
+        console.log('🔄 Cloud has products, skipping sample data creation');
       }
-    ];
-    localStorage.setItem('adminProducts', JSON.stringify(sampleProducts));
+    } catch (error) {
+      console.error('Error checking cloud products:', error);
+      // If cloud check fails, don't create samples to avoid conflicts
+    }
   }
+}
 
   // Initialize empty arrays for orders and customers if they don't exist
   if (!localStorage.getItem('adminOrders')) {

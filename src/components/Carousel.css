@@ -1,0 +1,235 @@
+.carousel-container {
+  position: relative;
+  height: 400px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1e293b, #334155);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  margin: 0 auto;
+}
+
+.carousel-container.round {
+  border-radius: 50%;
+}
+
+.carousel-track {
+  display: flex;
+  height: 100%;
+  cursor: grab;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.carousel-track:active {
+  cursor: grabbing;
+}
+
+.carousel-item {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.carousel-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, 
+    rgba(139, 69, 19, 0.1) 0%,
+    rgba(160, 82, 45, 0.1) 25%,
+    rgba(205, 133, 63, 0.1) 50%,
+    rgba(222, 184, 135, 0.1) 75%,
+    rgba(139, 69, 19, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 12px;
+}
+
+.carousel-item:hover::before {
+  opacity: 1;
+}
+
+.carousel-item.round {
+  border-radius: 50%;
+}
+
+.carousel-item-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  height: 80px;
+}
+
+.carousel-item-header.round {
+  margin-bottom: 10px;
+  height: 60px;
+}
+
+.carousel-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, rgba(139, 69, 19, 0.3), rgba(205, 133, 63, 0.3));
+  border-radius: 50%;
+  border: 2px solid rgba(222, 184, 135, 0.4);
+  box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3);
+}
+
+.carousel-icon {
+  font-size: 24px;
+  color: #deb887;
+}
+
+.carousel-item-content {
+  text-align: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.carousel-item-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #deb887, #f4e4bc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.3;
+}
+
+.carousel-item-description {
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+.carousel-indicators-container {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.carousel-indicators-container.round {
+  bottom: 10px;
+}
+
+.carousel-indicators {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.carousel-indicator.active {
+  background: linear-gradient(135deg, #deb887, #f4e4bc);
+  box-shadow: 0 2px 8px rgba(222, 184, 135, 0.4);
+}
+
+.carousel-indicator.inactive {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.carousel-indicator:hover {
+  background: rgba(222, 184, 135, 0.6);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .carousel-container {
+    height: 350px;
+  }
+
+  .carousel-item {
+    padding: 16px;
+  }
+
+  .carousel-item-header {
+    height: 60px;
+    margin-bottom: 15px;
+  }
+
+  .carousel-icon-container {
+    width: 50px;
+    height: 50px;
+  }
+
+  .carousel-icon {
+    font-size: 20px;
+  }
+
+  .carousel-item-title {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .carousel-item-description {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-container {
+    height: 300px;
+  }
+
+  .carousel-item {
+    padding: 12px;
+  }
+
+  .carousel-item-header {
+    height: 50px;
+    margin-bottom: 10px;
+  }
+
+  .carousel-icon-container {
+    width: 40px;
+    height: 40px;
+  }
+
+  .carousel-icon {
+    font-size: 18px;
+  }
+
+  .carousel-item-title {
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+
+  .carousel-item-description {
+    font-size: 12px;
+  }
+
+  .carousel-indicators-container {
+    bottom: 15px;
+  }
+}

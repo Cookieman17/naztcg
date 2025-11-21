@@ -1,0 +1,25 @@
+{
+  "products": [],
+  "orders": [],
+  "customers": [],
+  "categories": [
+    "Grading",
+    "Trading Cards", 
+    "Accessories",
+    "Supplies"
+  ],
+  "series": [
+    "Base Set",
+    "Jungle", 
+    "Fossil",
+    "Team Rocket",
+    "Gym Heroes",
+    "Neo Genesis",
+    "Ruby & Sapphire",
+    "Diamond & Pearl",
+    "Black & White",
+    "XY",
+    "Sun & Moon",
+    "Sword & Shield"
+  ]
+}

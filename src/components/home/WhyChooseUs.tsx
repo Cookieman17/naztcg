@@ -63,7 +63,7 @@ const WhyChooseUs = () => {
         <ScrollStack
           itemDistance={150}
           itemScale={0.05}
-          itemStackDistance={40}
+          itemStackDistance={15}
           stackPosition="20%"
           scaleEndPosition="10%"
           baseScale={0.9}

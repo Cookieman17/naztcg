@@ -1,0 +1,38 @@
+/* TargetCursor Component Styles */
+.target-cursor {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  color: #3b82f6; /* Blue color */
+}
+
+.target-cursor.visible {
+  opacity: 1;
+}
+
+.target-cursor.hovering {
+  color: #ef4444; /* Red color when hovering */
+}
+
+.target-cursor-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+/* Styles for cursor target elements */
+.cursor-target {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.cursor-target:hover {
+  transform: scale(1.02);
+}
+
+/* Hide default cursor when target cursor is active */
+body.cursor-none,
+body.cursor-none * {
+  cursor: none !important;
+}

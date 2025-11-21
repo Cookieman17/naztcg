@@ -167,7 +167,6 @@ export const initializeSampleData = async () => {
       // If cloud check fails, don't create samples to avoid conflicts
     }
   }
-}
 
   // Initialize empty arrays for orders and customers if they don't exist
   if (!localStorage.getItem('adminOrders')) {

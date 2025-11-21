@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Shield, Clock, Users, TrendingUp, Lock, Globe } from "lucide-react";
+import TargetCursor from "@/components/TargetCursor";
 
 const WhyChooseUs = () => {
   const features = [
@@ -37,6 +38,11 @@ const WhyChooseUs = () => {
 
   return (
     <section className="py-20 bg-gradient-hero text-primary-foreground">
+      <TargetCursor 
+        spinDuration={2}
+        hideDefaultCursor={true}
+        parallaxOn={true}
+      />
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-4">Why Choose NAZ Grading?</h2>
@@ -51,7 +57,7 @@ const WhyChooseUs = () => {
             return (
               <Card 
                 key={index} 
-                className="p-6 bg-primary-foreground/10 backdrop-blur-sm border-primary-foreground/20 hover:bg-primary-foreground/15 transition-all"
+                className="cursor-target p-6 bg-primary-foreground/10 backdrop-blur-sm border-primary-foreground/20 hover:bg-primary-foreground/15 transition-all"
               >
                 <Icon className="w-10 h-10 text-accent mb-4" />
                 <h3 className="text-xl font-bold mb-3">{feature.title}</h3>

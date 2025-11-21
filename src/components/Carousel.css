@@ -1,34 +1,24 @@
 .carousel-container {
   position: relative;
+  width: 400px;
   height: 400px;
   overflow: hidden;
   border-radius: 12px;
   background: linear-gradient(135deg, #8B4513, #A0522D, #CD853F);
-  border: 2px solid rgba(222, 184, 135, 0.4);
-  box-shadow: 0 20px 50px rgba(139, 69, 19, 0.5);
+  border: 3px solid rgba(222, 184, 135, 0.5);
+  box-shadow: 0 20px 50px rgba(139, 69, 19, 0.6);
   margin: 0 auto;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .carousel-container.round {
   border-radius: 50%;
-  height: 400px;
-  width: 400px;
-  min-width: 400px;
-  min-height: 400px;
 }
 
 .carousel-track {
   display: flex;
   height: 100%;
   cursor: grab;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: relative;
   transform-style: preserve-3d;
   will-change: transform;
   backface-visibility: hidden;
@@ -40,14 +30,16 @@
 
 .carousel-item {
   flex-shrink: 0;
-  background: linear-gradient(135deg, rgba(222, 184, 135, 0.2), rgba(160, 82, 45, 0.1));
+  background: linear-gradient(135deg, rgba(222, 184, 135, 0.25), rgba(160, 82, 45, 0.15));
   backdrop-filter: blur(15px);
-  border: 1px solid rgba(222, 184, 135, 0.3);
-  border-radius: 12px;
-  padding: 20px;
+  border: 1px solid rgba(222, 184, 135, 0.4);
+  border-radius: 16px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
   transform-style: preserve-3d;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   color: white;
@@ -55,6 +47,7 @@
   overflow: hidden;
   will-change: transform;
   backface-visibility: hidden;
+  height: 100%;
 }
 
 .carousel-item::before {
@@ -150,9 +143,7 @@
 }
 
 .carousel-indicators-container.round {
-  bottom: 15px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 30px;
 }
 
 .carousel-indicators {
@@ -190,27 +181,12 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .carousel-container {
-    height: 300px;
-  }
-
-  .carousel-container.round {
-    height: 300px;
     width: 300px;
-    min-width: 300px;
-    min-height: 300px;
+    height: 300px;
   }
 
   .carousel-item {
     padding: 16px;
-    /* Reduce 3D effects on mobile for smoother performance */
-    transform: translateZ(0) !important;
-    backface-visibility: hidden !important;
-  }
-
-  .carousel-track {
-    /* Optimize for mobile performance */
-    transform: translate(-50%, -50%) translate3d(0, 0, 0);
-    perspective: none;
   }
 
   .carousel-item-header {

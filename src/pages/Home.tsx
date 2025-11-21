@@ -19,22 +19,14 @@ const Home = () => {
       <HeroSlideshow />
       <WhatIsGrading />
       <div className="py-16 px-4 bg-gradient-to-br from-amber-900 via-yellow-900 to-orange-900">
-        <div className="container mx-auto">
-          <div className="text-center mb-12">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-amber-100 mb-4">How It Works</h2>
             <p className="text-xl text-amber-200 max-w-3xl mx-auto">
               Discover our professional card grading process and premium services
             </p>
           </div>
-          <div style={{ 
-            height: '500px', 
-            width: '100%',
-            position: 'relative', 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center',
-            padding: '20px'
-          }}>
+          <div className="flex justify-center items-center w-full">
             <Carousel
               baseWidth={400}
               autoplay={true}

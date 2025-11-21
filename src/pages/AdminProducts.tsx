@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { productService } from "@/services/productService";
-import { Product } from "@/lib/supabase";
+import { fallbackProductService } from "@/lib/fallback-products";
+import { Product } from "@/lib/supabase-simple";
 import { 
   Search, 
   Plus, 
@@ -54,7 +54,7 @@ const AdminProducts = () => {
       setError(null);
       try {
         const filters = { includeInactive: true }; // Admin should see all products
-        const result = await productService.getProducts(filters);
+        const result = await fallbackProductService.getProducts(filters);
         setProducts(result.products);
         setFilteredProducts(result.products);
       } catch (error) {
@@ -227,7 +227,7 @@ const AdminProducts = () => {
       try {
         setSaving(true);
         setError(null);
-        await productService.deleteProduct(productId);
+        await fallbackProductService.deleteProduct(productId);
         setProducts(prev => prev.filter(p => p.id !== productId));
       } catch (error) {
         console.error('Error deleting product:', error);

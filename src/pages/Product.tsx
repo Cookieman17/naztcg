@@ -4,8 +4,8 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/home/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { productService } from "@/services/productService";
-import { Product as ProductType } from "@/lib/supabase";
+import { fallbackProductService } from "@/lib/fallback-products";
+import { Product as ProductType } from "@/lib/supabase-simple";
 import { useCart } from "@/context/CartContext";
 
 const Product = () => {
@@ -17,7 +17,7 @@ const Product = () => {
   useEffect(() => {
     const loadProduct = async () => {
       try {
-        const foundProduct = await productService.getProductById(id);
+        const foundProduct = await fallbackProductService.getProductById(id);
         setProduct(foundProduct);
       } catch (error) {
         console.error('Error loading product:', error);

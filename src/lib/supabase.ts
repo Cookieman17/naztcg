@@ -6,14 +6,14 @@ export interface Product {
   id: string;
   name: string;
   description?: string;
-  series: string;
-  set_name?: string;
-  rarity: string;
+  series?: string;
+  rarity?: string;
   category: string;
-  base_price: number;
+  price: number;
   image_url?: string;
   stock_quantity: number;
-  status: 'active' | 'inactive' | 'discontinued';
+  condition: 'mint' | 'near_mint' | 'lightly_played' | 'moderately_played' | 'heavily_played' | 'damaged';
+  status: 'active' | 'inactive';
   created_at: string;
   updated_at: string;
 }
@@ -208,7 +208,7 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
+export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,

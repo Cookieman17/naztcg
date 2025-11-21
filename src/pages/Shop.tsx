@@ -7,8 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Search, Filter, Package } from "lucide-react";
 import { Link } from "react-router-dom";
-import { productService } from "@/services/productService";
-import { Product } from "@/lib/supabase";
+import { fallbackProductService } from "@/lib/fallback-products";
+import { Product } from "@/lib/supabase-simple";
 
 const Shop = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,7 +25,7 @@ const Shop = () => {
       setLoading(true);
       try {
         // Load all active products with stock from Supabase
-        const result = await productService.getProducts({
+        const result = await fallbackProductService.getProducts({
           status: 'active',
           inStock: true
         });

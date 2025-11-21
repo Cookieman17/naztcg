@@ -1,10 +1,8 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { cartService } from '@/services/cartService';
-import { Product, CartItem } from '@/lib/supabase';
+import { fallbackCartService, CartItem } from '@/lib/fallback-cart';
+import { Product } from '@/lib/supabase-simple';
 
-type EnrichedCartItem = CartItem & {
-  product: Product;
-};
+type EnrichedCartItem = CartItem;
 
 type CartContextValue = {
   items: EnrichedCartItem[];
@@ -29,7 +27,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshCart = useCallback(async () => {
     try {
       setError(null);
-      const cartData = await cartService.getCart();
+      const cartData = await fallbackCartService.getCart();
       setItems(cartData.items);
     } catch (err) {
       console.error('Error loading cart:', err);
@@ -49,7 +47,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setError(null);
       setLoading(true);
-      await cartService.addToCart(product.id, quantity);
+      await fallbackCartService.addToCart(product.id, quantity);
       await refreshCart();
     } catch (err: any) {
       console.error('Error adding to cart:', err);
@@ -64,7 +62,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setError(null);
       setLoading(true);
-      await cartService.updateCartItem(itemId, quantity);
+      await fallbackCartService.updateCartItem(itemId, quantity);
       await refreshCart();
     } catch (err: any) {
       console.error('Error updating cart:', err);
@@ -79,7 +77,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setError(null);
       setLoading(true);
-      await cartService.removeFromCart(itemId);
+      await fallbackCartService.removeFromCart(itemId);
       await refreshCart();
     } catch (err: any) {
       console.error('Error removing from cart:', err);
@@ -94,7 +92,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setError(null);
       setLoading(true);
-      await cartService.clearCart();
+      await fallbackCartService.clearCart();
       setItems([]);
     } catch (err: any) {
       console.error('Error clearing cart:', err);

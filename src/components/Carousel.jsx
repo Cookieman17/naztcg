@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
-// replace icons with your own if needed
-import { FiCircle, FiCode, FiFileText, FiLayers, FiLayout } from 'react-icons/fi';
+// Card grading specific icons
+import { FiShield, FiAward, FiStar, FiEye, FiTruck } from 'react-icons/fi';
 
 import './Carousel.css';
 
@@ -10,38 +10,38 @@ const DEFAULT_ITEMS = [
     title: 'Professional Grading',
     description: 'Expert authentication and condition assessment for your valuable cards.',
     id: 1,
-    icon: <FiFileText className="carousel-icon" />
+    icon: <FiEye className="carousel-icon" />
   },
   {
     title: 'Secure Process',
     description: 'Industry-leading security protocols to protect your collection.',
     id: 2,
-    icon: <FiCircle className="carousel-icon" />
+    icon: <FiShield className="carousel-icon" />
   },
   {
     title: 'Quality Assurance',
     description: 'Rigorous quality checks ensure accurate and consistent grading.',
     id: 3,
-    icon: <FiLayers className="carousel-icon" />
+    icon: <FiStar className="carousel-icon" />
   },
   {
     title: 'Premium Display',
     description: 'Beautiful protective cases that showcase your graded cards.',
     id: 4,
-    icon: <FiLayout className="carousel-icon" />
+    icon: <FiAward className="carousel-icon" />
   },
   {
     title: 'Fast Turnaround',
     description: 'Quick processing times to get your cards back safely.',
     id: 5,
-    icon: <FiCode className="carousel-icon" />
+    icon: <FiTruck className="carousel-icon" />
   }
 ];
 
-const DRAG_BUFFER = 0;
-const VELOCITY_THRESHOLD = 500;
+const DRAG_BUFFER = 50;
+const VELOCITY_THRESHOLD = 300;
 const GAP = 16;
-const SPRING_OPTIONS = { type: 'spring', stiffness: 300, damping: 30 };
+const SPRING_OPTIONS = { type: 'spring', stiffness: 400, damping: 40, mass: 0.8 };
 
 export default function Carousel({
   items = DEFAULT_ITEMS,
@@ -159,7 +159,7 @@ export default function Carousel({
       >
         {carouselItems.map((item, index) => {
           const range = [-(index + 1) * trackItemOffset, -index * trackItemOffset, -(index - 1) * trackItemOffset];
-          const outputRange = [90, 0, -90];
+          const outputRange = [30, 0, -30]; // Reduced rotation for smoothness
           // eslint-disable-next-line react-hooks/rules-of-hooks
           const rotateY = useTransform(x, range, outputRange, { clamp: false });
           return (

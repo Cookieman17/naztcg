@@ -28,12 +28,12 @@ const Home = () => {
           </div>
           <div style={{ height: '600px', position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <Carousel
-              baseWidth={350}
+              baseWidth={400}
               autoplay={true}
-              autoplayDelay={4000}
+              autoplayDelay={5000}
               pauseOnHover={true}
               loop={true}
-              round={false}
+              round={true}
             />
           </div>
         </div>

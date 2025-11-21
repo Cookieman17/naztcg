@@ -9,14 +9,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { orderService } from "@/services/orderService";
 import StripePaymentButton from "@/components/StripePaymentButton";
 import type { PaymentData } from "@/components/StripePaymentButton";
 import type { DiscountCode } from "./AdminDiscountCodes";
+import { Loader } from "lucide-react";
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { items, clearCart } = useCart();
+  const { items, clearCart, loading: cartLoading, totalAmount } = useCart();
+  const [processing, setProcessing] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
     name: "",
     email: "",
@@ -31,7 +34,7 @@ const Checkout = () => {
   const [discountError, setDiscountError] = useState("");
 
   // Calculate totals
-  const subtotal = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  const subtotal = totalAmount; // Use the totalAmount from cart context
   const shipping = subtotal > 50 ? 0 : 4.99; // Free shipping over £50
   
   // Calculate discount amounts
@@ -56,6 +59,22 @@ const Checkout = () => {
   
   const finalShipping = hasFreeShipping ? 0 : shipping;
   const total = subtotal - productDiscountAmount + finalShipping;
+
+  // Show loading state
+  if (cartLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navigation />
+        <main className="flex-grow pt-24 pb-12">
+          <div className="container mx-auto px-4 text-center">
+            <Loader className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p>Loading checkout...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   // Redirect if cart is empty
   if (items.length === 0) {
@@ -187,83 +206,58 @@ const Checkout = () => {
     });
   };
 
-  const handlePaymentSuccess = (paymentData: PaymentData) => {
-    // Create order from cart items
-    const orderData = {
-      id: `ORDER-${Date.now()}`,
-      customerName: customerInfo.name,
-      customerEmail: customerInfo.email,
-      customerPhone: customerInfo.phone,
-      shippingAddress: {
-        address: customerInfo.address,
-        city: customerInfo.city,
-        postcode: customerInfo.postcode,
-        country: customerInfo.country
-      },
-      items: items.map(item => ({
-        productId: item.product.id,
-        productName: item.product.name,
-        quantity: item.quantity,
-        price: item.product.price,
-        total: item.product.price * item.quantity
-      })),
-      subtotal,
-      appliedDiscounts: appliedDiscounts.map(d => ({
-        code: d.code,
-        type: d.type,
-        value: d.value,
-        description: d.description
-      })),
-      productDiscountAmount,
-      shippingDiscountAmount,
-      totalDiscountAmount,
-      shipping: finalShipping,
-      total,
-      paymentIntentId: paymentData.paymentIntentId,
-      status: 'confirmed',
-      createdAt: new Date().toISOString(),
-      type: 'product_purchase'
-    };
+  const handlePaymentSuccess = async (paymentData: PaymentData) => {
+    try {
+      setProcessing(true);
+      
+      // Create order data
+      const orderData = {
+        customerInfo: {
+          name: customerInfo.name,
+          email: customerInfo.email,
+          phone: customerInfo.phone,
+          address: customerInfo.address,
+          city: customerInfo.city,
+          postcode: customerInfo.postcode,
+          country: customerInfo.country
+        },
+        appliedDiscounts: appliedDiscounts.map(d => ({
+          code: d.code,
+          type: d.type,
+          value: d.value,
+          description: d.description
+        })),
+        paymentIntentId: paymentData.paymentIntentId
+      };
 
-    // Save order to admin system
-    const existingOrders = JSON.parse(localStorage.getItem('adminOrders') || '[]');
-    existingOrders.push(orderData);
-    localStorage.setItem('adminOrders', JSON.stringify(existingOrders));
+      // Create order using orderService
+      const order = await orderService.createOrder(orderData);
 
-    // Update discount code usage counts
-    if (appliedDiscounts.length > 0) {
-      const savedCodes = localStorage.getItem('adminDiscountCodes');
-      if (savedCodes) {
-        const discountCodes: DiscountCode[] = JSON.parse(savedCodes);
-        const updatedCodes = discountCodes.map(code => {
-          const appliedDiscount = appliedDiscounts.find(d => d.id === code.id);
-          return appliedDiscount 
-            ? { ...code, currentUses: code.currentUses + 1 }
-            : code;
-        });
-        localStorage.setItem('adminDiscountCodes', JSON.stringify(updatedCodes));
-        window.dispatchEvent(new CustomEvent('discountCodesUpdated'));
-      }
+      // Clear cart after successful order creation
+      await clearCart();
+      
+      // Navigate to order confirmation with order data
+      navigate('/order-confirmation', { 
+        state: { 
+          orderData: order,
+          isProductOrder: true
+        } 
+      });
+
+      toast({
+        title: "Order confirmed!",
+        description: "Thank you for your purchase. Your order has been confirmed.",
+      });
+    } catch (error: any) {
+      console.error('Order creation error:', error);
+      toast({
+        title: "Order processing failed",
+        description: error.message || "There was an error processing your order. Please contact support.",
+        variant: "destructive",
+      });
+    } finally {
+      setProcessing(false);
     }
-
-    // Dispatch event for real-time updates
-    window.dispatchEvent(new CustomEvent('ordersUpdated'));
-
-    // Clear cart and navigate to confirmation
-    clearCart();
-    
-    // Navigate to order confirmation with order data
-    navigate('/order-confirmation', { 
-      state: { 
-        orderData,
-        isProductOrder: true
-      } 
-    });
-
-    toast({
-      title: "Order confirmed!",
-      description: "Thank you for your purchase. Your order has been confirmed.",
-    });
   };
 
   const isFormValid = customerInfo.name && customerInfo.email && customerInfo.address && 
@@ -368,10 +362,10 @@ const Checkout = () => {
                 <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
                 <div className="space-y-4">
                   {items.map((item) => (
-                    <div key={item.product.id} className="flex items-center gap-4">
+                    <div key={item.id} className="flex items-center gap-4">
                       <div className="w-16 h-16 bg-secondary rounded">
                         <img 
-                          src={item.product.image} 
+                          src={item.product.image_url || '/placeholder.svg'} 
                           alt={item.product.name}
                           className="w-full h-full object-cover rounded"
                           onError={(e) => {
@@ -508,21 +502,31 @@ const Checkout = () => {
               <Card className="p-6">
                 <h2 className="text-xl font-semibold mb-4">Payment</h2>
                 {isFormValid ? (
-                  <StripePaymentButton
-                    amount={Math.round(total * 100)} // Convert to pence
-                    currency="gbp"
-                    description={`Purchase of ${items.length} item(s)`}
-                    customerEmail={customerInfo.email}
-                    onSuccess={handlePaymentSuccess}
-                    onError={(error) => {
-                      console.error('Payment error:', error);
-                      toast({
-                        title: "Payment failed",
-                        description: error.message || "Please try again.",
-                        variant: "destructive",
-                      });
-                    }}
-                  />
+                  <>
+                    {processing && (
+                      <div className="text-center py-4 mb-4">
+                        <Loader className="h-6 w-6 animate-spin mx-auto mb-2" />
+                        <p className="text-muted-foreground">Processing your order...</p>
+                      </div>
+                    )}
+                    <StripePaymentButton
+                      amount={Math.round(total * 100)} // Convert to pence
+                      currency="gbp"
+                      description={`Purchase of ${items.length} item(s)`}
+                      customerEmail={customerInfo.email}
+                      onSuccess={handlePaymentSuccess}
+                      onError={(error) => {
+                        console.error('Payment error:', error);
+                        setProcessing(false);
+                        toast({
+                          title: "Payment failed",
+                          description: error.message || "Please try again.",
+                          variant: "destructive",
+                        });
+                      }}
+                      disabled={processing}
+                    />
+                  </>
                 ) : (
                   <div className="text-center py-4">
                     <p className="text-muted-foreground mb-4">

@@ -4,7 +4,8 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/home/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getProductById, Product as ProductType } from "@/lib/products";
+import { productService } from "@/services/productService";
+import { Product as ProductType } from "@/lib/supabase";
 import { useCart } from "@/context/CartContext";
 
 const Product = () => {
@@ -16,10 +17,11 @@ const Product = () => {
   useEffect(() => {
     const loadProduct = async () => {
       try {
-        const foundProduct = await getProductById(id);
+        const foundProduct = await productService.getProductById(id);
         setProduct(foundProduct);
       } catch (error) {
         console.error('Error loading product:', error);
+        setProduct(null);
       } finally {
         setLoading(false);
       }
@@ -72,18 +74,43 @@ const Product = () => {
           <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-8 items-start">
             <Card className="p-0 overflow-hidden">
               <div className="aspect-square bg-secondary">
-                <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                <img 
+                  src={product.image_url || '/placeholder.svg'} 
+                  alt={product.name} 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/placeholder.svg';
+                  }}
+                />
               </div>
             </Card>
 
             <div>
               <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
-              <p className="text-sm text-muted-foreground mb-4">{product.set} • {product.serialNumber ?? "No serial"}</p>
+              <div className="space-y-2 mb-4">
+                <p className="text-sm text-muted-foreground">
+                  {product.series && `${product.series} • `}
+                  {product.category}
+                  {product.rarity && ` • ${product.rarity}`}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Condition: {product.condition.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Stock: {product.stock_quantity} available
+                </p>
+              </div>
               <div className="text-3xl font-bold text-primary mb-6">£{product.price.toLocaleString()}</div>
               <p className="text-muted-foreground mb-6">{product.description}</p>
 
               <div className="flex gap-4">
-                <Button variant="premium" onClick={() => addToCart(product)}>Add to Cart</Button>
+                <Button 
+                  variant="premium" 
+                  onClick={() => addToCart(product)}
+                  disabled={product.stock_quantity === 0 || product.status !== 'active'}
+                >
+                  {product.stock_quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+                </Button>
                 <Link to="/shop">
                   <Button variant="outline">Back to Shop</Button>
                 </Link>

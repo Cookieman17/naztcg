@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { cloudStorage } from "@/lib/cloudStorage";
+import { productService } from "@/services/productService";
+import { Product } from "@/lib/supabase";
 import { 
   Search, 
   Plus, 
@@ -21,21 +22,6 @@ import {
   WifiOff
 } from "lucide-react";
 
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  series: string;
-  rarity: string;
-  stock: number;
-  image: string;
-  status: 'active' | 'inactive';
-  createdAt: string;
-  updatedAt: string;
-}
-
 const AdminProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -46,7 +32,7 @@ const AdminProducts = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [storageStatus, setStorageStatus] = useState({ cloud: false, local: true, message: "" });
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -56,42 +42,30 @@ const AdminProducts = () => {
     rarity: "",
     stock: "",
     image: "",
-    status: "active" as "active" | "inactive"
+    condition: "mint" as const,
+    status: "active" as const
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
 
   useEffect(() => {
-    // Load products from cloud storage
     const loadProducts = async () => {
       setLoading(true);
+      setError(null);
       try {
-        const savedProducts = await cloudStorage.loadProducts();
-        setProducts(savedProducts);
-        setFilteredProducts(savedProducts);
-        
-        // Update storage status
-        setStorageStatus(cloudStorage.getStorageStatus());
+        const filters = { includeInactive: true }; // Admin should see all products
+        const result = await productService.getProducts(filters);
+        setProducts(result.products);
+        setFilteredProducts(result.products);
       } catch (error) {
         console.error('Error loading products:', error);
-        // Fallback to localStorage
-        const localProducts = JSON.parse(localStorage.getItem("adminProducts") || "[]");
-        setProducts(localProducts);
-        setFilteredProducts(localProducts);
+        setError('Failed to load products. Please try again.');
       } finally {
         setLoading(false);
       }
     };
 
     loadProducts();
-
-    // Listen for product updates from other tabs/devices
-    const handleProductsUpdate = () => {
-      loadProducts();
-    };
-
-    window.addEventListener('productsUpdated', handleProductsUpdate);
-    return () => window.removeEventListener('productsUpdated', handleProductsUpdate);
   }, []);
 
   useEffect(() => {
@@ -101,7 +75,7 @@ const AdminProducts = () => {
     if (searchTerm) {
       filtered = filtered.filter(product =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (product.series && product.series.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (product.rarity && product.rarity.toLowerCase().includes(searchTerm.toLowerCase()))
       );
@@ -149,6 +123,14 @@ const AdminProducts = () => {
     "Shrouded Fable", "Stellar Crown", "Surging Sparks"
   ];
   const rarities = ["Common", "Uncommon", "Rare", "Rare Holo", "Ultra Rare", "Secret Rare", "Promo"];
+  const conditions = [
+    { value: "mint", label: "Mint" },
+    { value: "near_mint", label: "Near Mint" },
+    { value: "lightly_played", label: "Lightly Played" },
+    { value: "moderately_played", label: "Moderately Played" },
+    { value: "heavily_played", label: "Heavily Played" },
+    { value: "damaged", label: "Damaged" }
+  ];
 
   const resetForm = () => {
     setFormData({
@@ -160,6 +142,7 @@ const AdminProducts = () => {
       rarity: "",
       stock: "",
       image: "",
+      condition: "mint",
       status: "active"
     });
     setEditingProduct(null);
@@ -186,43 +169,36 @@ const AdminProducts = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setError(null);
     
     try {
-      const productData: Product = {
-        id: editingProduct?.id || Date.now().toString(),
+      const productData = {
         name: formData.name,
         description: formData.description,
         price: parseFloat(formData.price),
         category: formData.category,
-        series: formData.series,
-        rarity: formData.rarity,
-        stock: parseInt(formData.stock),
-        image: formData.image || imagePreview || "/api/placeholder/300/200",
-        status: formData.status,
-        createdAt: editingProduct?.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        series: formData.series || null,
+        rarity: formData.rarity || null,
+        stock_quantity: parseInt(formData.stock),
+        image_url: formData.image || imagePreview || "/api/placeholder/300/200",
+        condition: formData.condition,
+        status: formData.status
       };
 
-      let updatedProducts;
+      let updatedProduct: Product;
       if (editingProduct) {
-        updatedProducts = products.map(p => p.id === editingProduct.id ? productData : p);
+        updatedProduct = await productService.updateProduct(editingProduct.id, productData);
+        setProducts(prev => prev.map(p => p.id === editingProduct.id ? updatedProduct : p));
       } else {
-        updatedProducts = [...products, productData];
+        updatedProduct = await productService.createProduct(productData);
+        setProducts(prev => [...prev, updatedProduct]);
       }
-
-      // Save to cloud storage (which also updates localStorage)
-      await cloudStorage.saveProducts(updatedProducts);
-      
-      setProducts(updatedProducts);
-      
-      // Update storage status
-      setStorageStatus(cloudStorage.getStorageStatus());
       
       resetForm();
       setIsDialogOpen(false);
     } catch (error) {
       console.error('Error saving product:', error);
-      alert('Error saving product. Please try again.');
+      setError('Failed to save product. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -232,16 +208,17 @@ const AdminProducts = () => {
     setEditingProduct(product);
     setFormData({
       name: product.name,
-      description: product.description,
+      description: product.description || "",
       price: product.price.toString(),
       category: product.category,
       series: product.series || "",
       rarity: product.rarity || "",
-      stock: product.stock.toString(),
-      image: product.image,
+      stock: product.stock_quantity.toString(),
+      image: product.image_url || "",
+      condition: product.condition,
       status: product.status
     });
-    setImagePreview(product.image);
+    setImagePreview(product.image_url || "");
     setIsDialogOpen(true);
   };
 
@@ -249,16 +226,12 @@ const AdminProducts = () => {
     if (confirm("Are you sure you want to delete this product?")) {
       try {
         setSaving(true);
-        await cloudStorage.deleteProduct(productId);
-        
-        const updatedProducts = products.filter(p => p.id !== productId);
-        setProducts(updatedProducts);
-        
-        // Update storage status
-        setStorageStatus(cloudStorage.getStorageStatus());
+        setError(null);
+        await productService.deleteProduct(productId);
+        setProducts(prev => prev.filter(p => p.id !== productId));
       } catch (error) {
         console.error('Error deleting product:', error);
-        alert('Error deleting product. Please try again.');
+        setError('Failed to delete product. Please try again.');
       } finally {
         setSaving(false);
       }
@@ -284,22 +257,12 @@ const AdminProducts = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Products</h1>
-          <div className="flex items-center gap-3 mt-2">
-            <p className="text-gray-600">Manage your product catalog</p>
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full text-sm">
-              {storageStatus.cloud ? (
-                <>
-                  <Cloud className="h-4 w-4 text-green-600" />
-                  <span className="text-green-600 font-medium">Synced across devices</span>
-                </>
-              ) : (
-                <>
-                  <WifiOff className="h-4 w-4 text-yellow-600" />
-                  <span className="text-yellow-600 font-medium">Local storage only</span>
-                </>
-              )}
+          <p className="text-gray-600 mt-2">Manage your product catalog</p>
+          {error && (
+            <div className="mt-2 p-3 bg-red-100 border border-red-200 rounded-lg text-red-700 text-sm">
+              {error}
             </div>
-          </div>
+          )}
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -344,7 +307,7 @@ const AdminProducts = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-sm font-medium">TCG Series</label>
                   <Select
@@ -374,6 +337,25 @@ const AdminProducts = () => {
                       {rarities.map(rarity => (
                         <SelectItem key={rarity} value={rarity}>{rarity}</SelectItem>
                       ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Condition</label>
+                  <Select
+                    value={formData.condition}
+                    onValueChange={(value: "mint" | "near_mint" | "lightly_played" | "moderately_played" | "heavily_played" | "damaged") => setFormData(prev => ({ ...prev, condition: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select condition" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="mint">Mint</SelectItem>
+                      <SelectItem value="near_mint">Near Mint</SelectItem>
+                      <SelectItem value="lightly_played">Lightly Played</SelectItem>
+                      <SelectItem value="moderately_played">Moderately Played</SelectItem>
+                      <SelectItem value="heavily_played">Heavily Played</SelectItem>
+                      <SelectItem value="damaged">Damaged</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -535,12 +517,12 @@ const AdminProducts = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProducts.length > 0 ? (
           filteredProducts.map((product) => {
-            const stockStatus = getStockStatus(product.stock);
+            const stockStatus = getStockStatus(product.stock_quantity);
             return (
               <Card key={product.id} className="hover:shadow-md transition-shadow">
                 <div className="aspect-video bg-gray-100 rounded-t-lg overflow-hidden">
                   <img
-                    src={product.image}
+                    src={product.image_url || "/api/placeholder/300/200"}
                     alt={product.name}
                     className="w-full h-full object-cover"
                   />
@@ -562,17 +544,18 @@ const AdminProducts = () => {
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 text-sm text-gray-500">
-                      <span>Stock: {product.stock}</span>
+                      <span>Stock: {product.stock_quantity}</span>
                       <span>{product.category}</span>
                       {product.series && <span>Series: {product.series}</span>}
                       {product.rarity && <span>Rarity: {product.rarity}</span>}
+                      <span>Condition: {conditions.find(c => c.value === product.condition)?.label || product.condition}</span>
                     </div>
 
                     <div className="flex items-center gap-2 pt-2">
                       <Badge variant={product.status === 'active' ? 'default' : 'secondary'}>
                         {product.status}
                       </Badge>
-                      {product.stock === 0 && (
+                      {product.stock_quantity === 0 && (
                         <AlertTriangle className="h-4 w-4 text-red-500" />
                       )}
                     </div>

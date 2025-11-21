@@ -240,6 +240,7 @@
   mix-blend-mode: overlay;
   filter: brightness(0.8) contrast(1.2);
   z-index: 4;
+  opacity: 0.7; /* Reduced glare intensity */
 }
 
 .pc-avatar-content {
@@ -558,5 +559,74 @@
     padding: 4px 8px;
     font-size: 9px;
     border-radius: 50px;
+  }
+}
+
+/* Mobile performance optimizations */
+@media (max-width: 768px) {
+  /* Reduce intensive effects on mobile */
+  .pc-glare {
+    opacity: 0.3 !important;
+    filter: brightness(0.9) contrast(1.05) !important;
+  }
+
+  .pc-shine {
+    filter: brightness(0.8) contrast(1.1) saturate(0.4) opacity(0.6) !important;
+    animation-duration: 24s !important; /* Slower animation */
+  }
+
+  .pc-shine::before {
+    opacity: 0.5 !important;
+    filter: brightness(1.2) contrast(1.2) saturate(0.6) !important;
+  }
+
+  .pc-shine::after {
+    opacity: 0.4 !important;
+    filter: brightness(0.9) contrast(1.2) !important;
+  }
+
+  /* Reduce transform intensity */
+  .pc-card:hover,
+  .pc-card.active {
+    transform: translateZ(0) rotateX(calc(var(--rotate-y) * 0.3)) rotateY(calc(var(--rotate-x) * 0.3)) !important;
+  }
+
+  /* Simplify background effects */
+  .pc-behind {
+    filter: blur(30px) saturate(1.0) !important;
+    opacity: calc(0.5 * var(--card-opacity)) !important;
+  }
+
+  /* Reduce avatar transform effects */
+  .pc-avatar-content .avatar {
+    transform: translateX(calc(-50% + (var(--pointer-from-left) - 0.5) * 2px)) translateZ(0)
+      scaleY(calc(1 + (var(--pointer-from-top) - 0.5) * 0.005)) scaleX(calc(1 + (var(--pointer-from-left) - 0.5) * 0.005)) !important;
+  }
+
+  /* Reduce content transform effects */
+  .pc-content:not(.pc-avatar-content) {
+    transform: translate3d(
+      calc(var(--pointer-from-left) * -2px + 1px),
+      calc(var(--pointer-from-top) * -2px + 1px),
+      0.1px
+    ) !important;
+  }
+}
+
+/* Extra mobile performance for very small screens */
+@media (max-width: 480px) {
+  .pc-shine {
+    animation: none !important; /* Disable animation completely on small screens */
+    background-size: 200% 200%, 150% 150%, 100% 100% !important;
+  }
+
+  .pc-glare {
+    opacity: 0.2 !important;
+  }
+
+  /* Minimal transforms on very small screens */
+  .pc-card:hover,
+  .pc-card.active {
+    transform: translateZ(0) rotateX(calc(var(--rotate-y) * 0.1)) rotateY(calc(var(--rotate-x) * 0.1)) !important;
   }
 }

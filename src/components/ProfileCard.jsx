@@ -36,6 +36,13 @@ const ProfileCardComponent = ({
   showUserInfo = true,
   onContactClick
 }) => {
+  // Detect mobile device for performance optimization
+  const isMobile = useMemo(() => {
+    return window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent);
+  }, []);
+
+  // Reduce animation intensity on mobile
+  const mobileReducedEffects = isMobile;
   const wrapRef = useRef(null);
   const shellRef = useRef(null);
 
@@ -72,6 +79,9 @@ const ProfileCardComponent = ({
       const centerX = percentX - 50;
       const centerY = percentY - 50;
 
+      // Reduce rotation intensity on mobile
+      const rotationMultiplier = mobileReducedEffects ? 0.2 : 1;
+
       const properties = {
         '--pointer-x': `${percentX}%`,
         '--pointer-y': `${percentY}%`,
@@ -80,8 +90,8 @@ const ProfileCardComponent = ({
         '--pointer-from-center': `${clamp(Math.hypot(percentY - 50, percentX - 50) / 50, 0, 1)}`,
         '--pointer-from-top': `${percentY / 100}`,
         '--pointer-from-left': `${percentX / 100}`,
-        '--rotate-x': `${round(-(centerX / 5))}deg`,
-        '--rotate-y': `${round(centerY / 4)}deg`
+        '--rotate-x': `${round(-(centerX / 5) * rotationMultiplier)}deg`,
+        '--rotate-y': `${round((centerY / 4) * rotationMultiplier)}deg`
       };
 
       for (const [k, v] of Object.entries(properties)) wrap.style.setProperty(k, v);
@@ -90,6 +100,15 @@ const ProfileCardComponent = ({
     const step = ts => {
       if (!running) return;
       if (lastTs === 0) lastTs = ts;
+      
+      // Throttle animation on mobile for better performance
+      const targetFPS = mobileReducedEffects ? 30 : 60;
+      const frameInterval = 1000 / targetFPS;
+      if (ts - lastTs < frameInterval && !mobileReducedEffects) {
+        rafId = requestAnimationFrame(step);
+        return;
+      }
+
       const dt = (ts - lastTs) / 1000;
       lastTs = ts;
 
@@ -101,7 +120,8 @@ const ProfileCardComponent = ({
 
       setVarsFromXY(currentX, currentY);
 
-      const stillFar = Math.abs(targetX - currentX) > 0.05 || Math.abs(targetY - currentY) > 0.05;
+      const threshold = mobileReducedEffects ? 0.5 : 0.05; // Larger threshold on mobile
+      const stillFar = Math.abs(targetX - currentX) > threshold || Math.abs(targetY - currentY) > threshold;
 
       if (stillFar || document.hasFocus()) {
         rafId = requestAnimationFrame(step);

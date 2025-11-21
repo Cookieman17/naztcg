@@ -39,7 +39,6 @@ const Home = () => {
         </div>
       </div>
       <WhyChooseUs />
-      <FAQ />
       
       {/* Profile Card Section */}
       <div className="py-16 px-4 flex justify-center">
@@ -57,6 +56,7 @@ const Home = () => {
         />
       </div>
       
+      <FAQ />
       <Footer />
     </div>
   );

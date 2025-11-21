@@ -187,10 +187,12 @@ const AdminProducts = () => {
 
       let updatedProduct: Product;
       if (editingProduct) {
-        updatedProduct = await productService.updateProduct(editingProduct.id, productData);
-        setProducts(prev => prev.map(p => p.id === editingProduct.id ? updatedProduct : p));
+        updatedProduct = await fallbackProductService.updateProduct(editingProduct.id, productData);
+        if (updatedProduct) {
+          setProducts(prev => prev.map(p => p.id === editingProduct.id ? updatedProduct : p));
+        }
       } else {
-        updatedProduct = await productService.createProduct(productData);
+        updatedProduct = await fallbackProductService.createProduct(productData);
         setProducts(prev => [...prev, updatedProduct]);
       }
       

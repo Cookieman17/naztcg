@@ -1,5 +1,5 @@
 // Fallback product management for when Supabase is not available
-import { Product } from './supabase';
+import { Product } from './supabase-simple';
 
 interface CreateProductData {
   name: string;

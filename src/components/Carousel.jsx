@@ -153,7 +153,10 @@ export default function Carousel({
           x
         }}
         onDragEnd={handleDragEnd}
-        animate={{ x: -(currentIndex * trackItemOffset) }}
+        animate={{ 
+          x: -(currentIndex * trackItemOffset),
+          y: '-50%' 
+        }}
         transition={effectiveTransition}
         onAnimationComplete={handleAnimationComplete}
       >

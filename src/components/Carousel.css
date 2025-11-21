@@ -4,23 +4,31 @@
   overflow: hidden;
   border-radius: 12px;
   background: linear-gradient(135deg, #8B4513, #A0522D, #CD853F);
-  border: 2px solid rgba(222, 184, 135, 0.3);
-  box-shadow: 0 15px 40px rgba(139, 69, 19, 0.4);
+  border: 2px solid rgba(222, 184, 135, 0.4);
+  box-shadow: 0 20px 50px rgba(139, 69, 19, 0.5);
   margin: 0 auto;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .carousel-container.round {
   border-radius: 50%;
   height: 400px;
   width: 400px;
+  min-width: 400px;
+  min-height: 400px;
 }
 
 .carousel-track {
   display: flex;
   height: 100%;
   cursor: grab;
-  position: relative;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   transform-style: preserve-3d;
   will-change: transform;
   backface-visibility: hidden;
@@ -138,10 +146,13 @@
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 10;
 }
 
 .carousel-indicators-container.round {
-  bottom: 10px;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .carousel-indicators {
@@ -185,6 +196,8 @@
   .carousel-container.round {
     height: 300px;
     width: 300px;
+    min-width: 300px;
+    min-height: 300px;
   }
 
   .carousel-item {
@@ -196,7 +209,7 @@
 
   .carousel-track {
     /* Optimize for mobile performance */
-    transform: translate3d(0, 0, 0);
+    transform: translate(-50%, -50%) translate3d(0, 0, 0);
     perspective: none;
   }
 

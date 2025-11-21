@@ -158,10 +158,6 @@ export default function Carousel({
         onAnimationComplete={handleAnimationComplete}
       >
         {carouselItems.map((item, index) => {
-          const range = [-(index + 1) * trackItemOffset, -index * trackItemOffset, -(index - 1) * trackItemOffset];
-          const outputRange = [30, 0, -30]; // Reduced rotation for smoothness
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          const rotateY = useTransform(x, range, outputRange, { clamp: false });
           return (
             <motion.div
               key={index}
@@ -169,7 +165,6 @@ export default function Carousel({
               style={{
                 width: itemWidth,
                 height: round ? itemWidth : '100%',
-                rotateY: rotateY,
                 ...(round && { borderRadius: '50%' })
               }}
               transition={effectiveTransition}

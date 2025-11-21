@@ -18,11 +18,11 @@ const Home = () => {
       <ScrollingBanner />
       <HeroSlideshow />
       <WhatIsGrading />
-      <div className="py-16 px-4 bg-gradient-to-br from-amber-900 via-yellow-900 to-orange-900">
+      <div className="py-16 px-4 bg-gradient-to-br from-red-900 via-red-800 to-red-700">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-amber-100 mb-4">How It Works</h2>
-            <p className="text-xl text-amber-200 max-w-3xl mx-auto">
+            <h2 className="text-4xl font-bold text-red-100 mb-4">How It Works</h2>
+            <p className="text-xl text-red-200 max-w-3xl mx-auto">
               Discover our professional card grading process and premium services
             </p>
           </div>

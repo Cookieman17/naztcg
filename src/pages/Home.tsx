@@ -8,6 +8,7 @@ import WhyChooseUs from "@/components/home/WhyChooseUs";
 import FAQ from "@/components/home/FAQ";
 import Footer from "@/components/home/Footer";
 import ProfileCard from "@/components/ProfileCard";
+import ShinyImage from "@/assets/Shiny.jpeg";
 
 const Home = () => {
   return (
@@ -29,7 +30,7 @@ const Home = () => {
           handle=""
           status=""
           contactText=""
-          avatarUrl="/src/assets/Shiny.jpeg"
+          avatarUrl={ShinyImage}
           showUserInfo={false}
           enableTilt={true}
           enableMobileTilt={false}

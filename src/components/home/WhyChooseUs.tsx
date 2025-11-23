@@ -61,9 +61,9 @@ const WhyChooseUs = () => {
       {/* ScrollStack Animation */}
       <div className="relative">
         <ScrollStack
-          itemDistance={150}
+          itemDistance={50}
           itemScale={0.05}
-          itemStackDistance={15}
+          itemStackDistance={10}
           stackPosition="20%"
           scaleEndPosition="10%"
           baseScale={0.9}

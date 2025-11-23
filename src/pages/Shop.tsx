@@ -7,8 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Search, Filter, Package } from "lucide-react";
 import { Link } from "react-router-dom";
-import { fallbackProductService } from "@/lib/fallback-products";
-import { Product } from "@/lib/supabase-simple";
+import { smartProductService } from "@/lib/smart-products";
+import { Product } from "@/lib/products";
 
 const Shop = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,29 +19,31 @@ const Shop = () => {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<string[]>([]);
 
-  // Load products and categories on component mount
+  // Load products and categories with real-time updates
   useEffect(() => {
     const loadProductsAndCategories = async () => {
       setLoading(true);
       try {
-        // Load all active products with stock from Supabase
-        const result = await fallbackProductService.getProducts({
-          status: 'active'
-          // Temporarily removed inStock: true to show all products
-        });
+        // Load all active products from smart service
+        const allProducts = await smartProductService.getProducts();
         
-        console.log('Shop: Loaded products from fallback service:', result);
+        // Filter for active products with stock
+        const activeProducts = allProducts.filter(product => 
+          product.status === 'active' && product.stock_quantity > 0
+        );
+        
+        console.log('🛒 Shop: Loaded products:', activeProducts.length, 'via', smartProductService.getServiceType());
         
         // Extract unique categories from products
         const uniqueCategories = [...new Set(
-          result.products
+          activeProducts
             .map(product => product.category)
             .filter(Boolean)
         )];
         setCategories(uniqueCategories);
 
         // Map products to display format (keeping compatibility with existing UI)
-        const displayProducts = result.products.map(product => ({
+        const displayProducts = activeProducts.map(product => ({
           ...product,
           set: product.series || 'Unknown Set',
           grade: null, // We don't have grade in the new schema
@@ -52,24 +54,48 @@ const Shop = () => {
         
         setProducts(displayProducts as any);
       } catch (error) {
-        console.error('Error loading products:', error);
+        console.error('🛒 Shop: Error loading products:', error);
         setProducts([]);
       } finally {
         setLoading(false);
       }
     };
 
+    // Set up real-time listener for product updates
+    const unsubscribe = smartProductService.subscribeToProducts((allProducts) => {
+      // Filter for active products with stock
+      const activeProducts = allProducts.filter(product => 
+        product.status === 'active' && product.stock_quantity > 0
+      );
+      
+      console.log('🛒 Shop: Update received:', activeProducts.length, 'active products via', smartProductService.getServiceType());
+      
+      // Extract unique categories
+      const uniqueCategories = [...new Set(
+        activeProducts
+          .map(product => product.category)
+          .filter(Boolean)
+      )];
+      setCategories(uniqueCategories);
+
+      // Map products to display format
+      const displayProducts = activeProducts.map(product => ({
+        ...product,
+        set: product.series || 'Unknown Set',
+        grade: null,
+        image: product.image_url || '/placeholder.svg',
+        serialNumber: null,
+        stock: product.stock_quantity
+      }));
+      
+      setProducts(displayProducts as any);
+      setLoading(false);
+    });
+
     loadProductsAndCategories();
 
-    // Listen for product updates from admin
-    const handleProductsUpdate = () => {
-      console.log('Shop: Product update event received, reloading...');
-      loadProductsAndCategories();
-    };
-
-    window.addEventListener('productsUpdated', handleProductsUpdate);
     return () => {
-      window.removeEventListener('productsUpdated', handleProductsUpdate);
+      unsubscribe();
     };
   }, []);
 

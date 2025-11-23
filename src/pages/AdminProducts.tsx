@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { fallbackProductService } from "@/lib/fallback-products";
-import { Product } from "@/lib/supabase-simple";
+import { smartProductService } from "@/lib/smart-products";
+import { Product } from "@/lib/products";
 import { 
   Search, 
   Plus, 
@@ -53,19 +53,31 @@ const AdminProducts = () => {
       setLoading(true);
       setError(null);
       try {
-        const filters = { includeInactive: true }; // Admin should see all products
-        const result = await fallbackProductService.getProducts(filters);
-        setProducts(result.products);
-        setFilteredProducts(result.products);
+        const products = await smartProductService.getProducts();
+        console.log('📦 AdminProducts: Loaded products:', products.length, 'via', smartProductService.getServiceType());
+        setProducts(products);
+        setFilteredProducts(products);
       } catch (error) {
-        console.error('Error loading products:', error);
+        console.error('📦 AdminProducts: Error loading products:', error);
         setError('Failed to load products. Please try again.');
       } finally {
         setLoading(false);
       }
     };
 
+    // Set up real-time listener (works with Firebase, polling with localStorage)
+    const unsubscribe = smartProductService.subscribeToProducts((products) => {
+      console.log('📦 AdminProducts: Update received:', products.length, 'products via', smartProductService.getServiceType());
+      setProducts(products);
+      setFilteredProducts(products);
+      setLoading(false);
+    });
+
     loadProducts();
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -185,17 +197,14 @@ const AdminProducts = () => {
         status: formData.status
       };
 
-      let updatedProduct: Product;
       if (editingProduct) {
-        updatedProduct = await fallbackProductService.updateProduct(editingProduct.id, productData);
-        if (updatedProduct) {
-          setProducts(prev => prev.map(p => p.id === editingProduct.id ? updatedProduct : p));
-        }
+        await smartProductService.updateProduct(editingProduct.id, productData);
+        console.log('📦 AdminProducts: Updated product:', editingProduct.id, 'via', smartProductService.getServiceType());
       } else {
-        updatedProduct = await fallbackProductService.createProduct(productData);
-        console.log('AdminProducts: Created new product:', updatedProduct);
-        setProducts(prev => [...prev, updatedProduct]);
+        const newProduct = await smartProductService.createProduct(productData);
+        console.log('📦 AdminProducts: Created new product:', newProduct.id, 'via', smartProductService.getServiceType());
       }
+      // Real-time listener will update the UI automatically
       
       resetForm();
       setIsDialogOpen(false);
@@ -230,10 +239,11 @@ const AdminProducts = () => {
       try {
         setSaving(true);
         setError(null);
-        await fallbackProductService.deleteProduct(productId);
-        setProducts(prev => prev.filter(p => p.id !== productId));
+        await smartProductService.deleteProduct(productId);
+        console.log('📦 AdminProducts: Deleted product:', productId, 'via', smartProductService.getServiceType());
+        // Real-time listener will update the UI automatically
       } catch (error) {
-        console.error('Error deleting product:', error);
+        console.error('🔥 AdminProducts: Error deleting product:', error);
         setError('Failed to delete product. Please try again.');
       } finally {
         setSaving(false);
@@ -259,8 +269,34 @@ const AdminProducts = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Products</h1>
-          <p className="text-gray-600 mt-2">Manage your product catalog</p>
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-3xl font-bold text-gray-900">Products</h1>
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${
+              smartProductService.isFirebaseEnabled() 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-yellow-100 text-yellow-800'
+            }`}>
+              {smartProductService.isFirebaseEnabled() ? (
+                <>
+                  <Cloud className="h-3 w-3" />
+                  Firebase (Real-time)
+                </>
+              ) : (
+                <>
+                  <WifiOff className="h-3 w-3" />
+                  Local Storage
+                </>
+              )}
+            </div>
+          </div>
+          <p className="text-gray-600">
+            Manage your product catalog
+            {!smartProductService.isFirebaseEnabled() && (
+              <span className="text-yellow-600 ml-2">
+                • <a href="/FIREBASE_SETUP.md" target="_blank" className="underline">Set up Firebase</a> for real-time sync
+              </span>
+            )}
+          </p>
           {error && (
             <div className="mt-2 p-3 bg-red-100 border border-red-200 rounded-lg text-red-700 text-sm">
               {error}

@@ -4,8 +4,8 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/home/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { fallbackProductService } from "@/lib/fallback-products";
-import { Product as ProductType } from "@/lib/supabase-simple";
+import { firebaseProductService } from "@/lib/firebase-products";
+import { Product as ProductType } from "@/lib/products";
 import { useCart } from "@/context/CartContext";
 
 const Product = () => {
@@ -17,10 +17,11 @@ const Product = () => {
   useEffect(() => {
     const loadProduct = async () => {
       try {
-        const foundProduct = await fallbackProductService.getProductById(id);
+        const foundProduct = await firebaseProductService.getProduct(id);
+        console.log('🔥 Product: Loaded from Firebase:', foundProduct?.name);
         setProduct(foundProduct);
       } catch (error) {
-        console.error('Error loading product:', error);
+        console.error('🔥 Product: Error loading from Firebase:', error);
         setProduct(null);
       } finally {
         setLoading(false);

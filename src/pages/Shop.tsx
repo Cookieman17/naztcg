@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Search, Filter, Package } from "lucide-react";
 import { Link } from "react-router-dom";
-import { smartProductService } from "@/lib/smart-products";
+import { firebaseProductService } from "@/lib/firebase-products";
 import { Product } from "@/lib/products";
 
 const Shop = () => {
@@ -24,15 +24,15 @@ const Shop = () => {
     const loadProductsAndCategories = async () => {
       setLoading(true);
       try {
-        // Load all active products from smart service
-        const allProducts = await smartProductService.getProducts();
+        // Load all products from Firebase
+        const allProducts = await firebaseProductService.getProducts();
         
         // Filter for active products with stock
         const activeProducts = allProducts.filter(product => 
           product.status === 'active' && product.stock_quantity > 0
         );
         
-        console.log('🛒 Shop: Loaded products:', activeProducts.length, 'via', smartProductService.getServiceType());
+        console.log('🔥 Shop: Loaded products from Firebase:', activeProducts.length);
         
         // Extract unique categories from products
         const uniqueCategories = [...new Set(
@@ -54,21 +54,21 @@ const Shop = () => {
         
         setProducts(displayProducts as any);
       } catch (error) {
-        console.error('🛒 Shop: Error loading products:', error);
+        console.error('🔥 Shop: Error loading products from Firebase:', error);
         setProducts([]);
       } finally {
         setLoading(false);
       }
     };
 
-    // Set up real-time listener for product updates
-    const unsubscribe = smartProductService.subscribeToProducts((allProducts) => {
+    // Set up Firebase real-time listener for product updates
+    const unsubscribe = firebaseProductService.subscribeToProducts((allProducts) => {
       // Filter for active products with stock
       const activeProducts = allProducts.filter(product => 
         product.status === 'active' && product.stock_quantity > 0
       );
       
-      console.log('🛒 Shop: Update received:', activeProducts.length, 'active products via', smartProductService.getServiceType());
+      console.log('🔥 Shop: Firebase real-time update received:', activeProducts.length, 'active products');
       
       // Extract unique categories
       const uniqueCategories = [...new Set(

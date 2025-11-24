@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { smartProductService } from "@/lib/smart-products";
+import { firebaseProductService } from "@/lib/firebase-products";
 import { Product } from "@/lib/products";
 import { 
   Search, 
@@ -53,21 +53,21 @@ const AdminProducts = () => {
       setLoading(true);
       setError(null);
       try {
-        const products = await smartProductService.getProducts();
-        console.log('📦 AdminProducts: Loaded products:', products.length, 'via', smartProductService.getServiceType());
+        const products = await firebaseProductService.getProducts();
+        console.log('🔥 AdminProducts: Loaded products from Firebase:', products.length);
         setProducts(products);
         setFilteredProducts(products);
       } catch (error) {
-        console.error('📦 AdminProducts: Error loading products:', error);
-        setError('Failed to load products. Please try again.');
+        console.error('🔥 AdminProducts: Error loading products from Firebase:', error);
+        setError('Failed to load products from Firebase. Please check your connection.');
       } finally {
         setLoading(false);
       }
     };
 
-    // Set up real-time listener (works with Firebase, polling with localStorage)
-    const unsubscribe = smartProductService.subscribeToProducts((products) => {
-      console.log('📦 AdminProducts: Update received:', products.length, 'products via', smartProductService.getServiceType());
+    // Set up Firebase real-time listener
+    const unsubscribe = firebaseProductService.subscribeToProducts((products) => {
+      console.log('🔥 AdminProducts: Real-time update from Firebase:', products.length, 'products');
       setProducts(products);
       setFilteredProducts(products);
       setLoading(false);
@@ -198,13 +198,13 @@ const AdminProducts = () => {
       };
 
       if (editingProduct) {
-        await smartProductService.updateProduct(editingProduct.id, productData);
-        console.log('📦 AdminProducts: Updated product:', editingProduct.id, 'via', smartProductService.getServiceType());
+        await firebaseProductService.updateProduct(editingProduct.id, productData);
+        console.log('🔥 AdminProducts: Updated product in Firebase:', editingProduct.id);
       } else {
-        const newProduct = await smartProductService.createProduct(productData);
-        console.log('📦 AdminProducts: Created new product:', newProduct.id, 'via', smartProductService.getServiceType());
+        const newProduct = await firebaseProductService.createProduct(productData);
+        console.log('🔥 AdminProducts: Created new product in Firebase:', newProduct.id);
       }
-      // Real-time listener will update the UI automatically
+      // Firebase real-time listener will update the UI automatically
       
       resetForm();
       setIsDialogOpen(false);
@@ -239,9 +239,9 @@ const AdminProducts = () => {
       try {
         setSaving(true);
         setError(null);
-        await smartProductService.deleteProduct(productId);
-        console.log('📦 AdminProducts: Deleted product:', productId, 'via', smartProductService.getServiceType());
-        // Real-time listener will update the UI automatically
+        await firebaseProductService.deleteProduct(productId);
+        console.log('🔥 AdminProducts: Deleted product from Firebase:', productId);
+        // Firebase real-time listener will update the UI automatically
       } catch (error) {
         console.error('🔥 AdminProducts: Error deleting product:', error);
         setError('Failed to delete product. Please try again.');
@@ -271,31 +271,13 @@ const AdminProducts = () => {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-3xl font-bold text-gray-900">Products</h1>
-            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${
-              smartProductService.isFirebaseEnabled() 
-                ? 'bg-green-100 text-green-800' 
-                : 'bg-yellow-100 text-yellow-800'
-            }`}>
-              {smartProductService.isFirebaseEnabled() ? (
-                <>
-                  <Cloud className="h-3 w-3" />
-                  Firebase (Real-time)
-                </>
-              ) : (
-                <>
-                  <WifiOff className="h-3 w-3" />
-                  Local Storage
-                </>
-              )}
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <Cloud className="h-3 w-3" />
+              Firebase (Real-time)
             </div>
           </div>
           <p className="text-gray-600">
-            Manage your product catalog
-            {!smartProductService.isFirebaseEnabled() && (
-              <span className="text-yellow-600 ml-2">
-                • <a href="/FIREBASE_SETUP.md" target="_blank" className="underline">Set up Firebase</a> for real-time sync
-              </span>
-            )}
+            Manage your product catalog with Firebase real-time synchronization
           </p>
           {error && (
             <div className="mt-2 p-3 bg-red-100 border border-red-200 rounded-lg text-red-700 text-sm">

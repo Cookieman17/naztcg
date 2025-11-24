@@ -46,11 +46,28 @@ const AdminOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   useEffect(() => {
-    // Load orders from localStorage
-    const savedOrders = JSON.parse(localStorage.getItem("adminOrders") || "[]");
-    setOrders(savedOrders);
-    setFilteredOrders(savedOrders);
+    loadOrders();
+    
+    // Subscribe to real-time updates
+    const unsubscribe = firebaseOrderService.subscribeToOrders((ordersData) => {
+      setOrders(ordersData);
+      setFilteredOrders(ordersData);
+      console.log('🔥 Orders: Real-time update received');
+    });
+    
+    return () => unsubscribe();
   }, []);
+  
+  const loadOrders = async () => {
+    try {
+      console.log('🔥 Orders: Loading from Firebase...');
+      const ordersData = await firebaseOrderService.getOrders();
+      setOrders(ordersData);
+      setFilteredOrders(ordersData);
+    } catch (error) {
+      console.error('🔥 Orders: Error loading from Firebase:', error);
+    }
+  };
 
   useEffect(() => {
     // Filter orders based on search and status
@@ -71,21 +88,23 @@ const AdminOrders = () => {
     setFilteredOrders(filtered);
   }, [orders, searchTerm, statusFilter]);
 
-  const updateOrderStatus = (orderId: string, newStatus: string) => {
-    const updatedOrders = orders.map(order =>
-      order.id === orderId
-        ? { ...order, status: newStatus, updatedAt: new Date().toISOString() }
-        : order
-    );
-    setOrders(updatedOrders);
-    localStorage.setItem("adminOrders", JSON.stringify(updatedOrders));
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      await firebaseOrderService.updateOrderStatus(orderId, newStatus as any);
+      console.log('🔥 Orders: Status updated in Firebase:', orderId, newStatus);
+    } catch (error) {
+      console.error('🔥 Orders: Error updating status:', error);
+    }
   };
 
-  const deleteOrder = (orderId: string) => {
+  const deleteOrder = async (orderId: string) => {
     if (confirm("Are you sure you want to delete this order?")) {
-      const updatedOrders = orders.filter(order => order.id !== orderId);
-      setOrders(updatedOrders);
-      localStorage.setItem("adminOrders", JSON.stringify(updatedOrders));
+      try {
+        await firebaseOrderService.deleteOrder(orderId);
+        console.log('🔥 Orders: Deleted from Firebase:', orderId);
+      } catch (error) {
+        console.error('🔥 Orders: Error deleting order:', error);
+      }
     }
   };
 

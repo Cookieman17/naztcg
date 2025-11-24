@@ -17,6 +17,9 @@ import {
   Download
 } from "lucide-react";
 import { getBackupInfo } from "@/lib/dataPersistence";
+import { firebaseProductService } from "@/lib/firebase-products";
+import { firebaseOrderService } from "@/lib/firebase-orders";
+import { firebaseCustomerService } from "@/lib/firebase-customers";
 
 interface DashboardStats {
   totalRevenue: number;
@@ -48,42 +51,55 @@ const AdminDashboard = () => {
   });
 
   useEffect(() => {
-    // Load data from localStorage
-    const orders = JSON.parse(localStorage.getItem("adminOrders") || "[]");
-    const products = JSON.parse(localStorage.getItem("adminProducts") || "[]");
-    const customers = JSON.parse(localStorage.getItem("adminCustomers") || "[]");
-
-    // Calculate stats
-    const totalRevenue = orders.reduce((sum: number, order: any) => sum + (order.total || 0), 0);
-    const recentOrders = orders
-      .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .slice(0, 5)
-      .map((order: any) => ({
-        id: order.id,
-        customer: order.customerName || order.email,
-        total: order.total,
-        status: order.status,
-        date: new Date(order.createdAt).toLocaleDateString()
-      }));
-
-    const lowStockProducts = products
-      .filter((product: any) => (product.stock || 0) < 10)
-      .slice(0, 5)
-      .map((product: any) => ({
-        id: product.id,
-        name: product.name,
-        stock: product.stock || 0
-      }));
-
-    setStats({
-      totalRevenue,
-      totalOrders: orders.length,
-      totalProducts: products.length,
-      totalCustomers: customers.length,
-      recentOrders,
-      lowStockProducts
-    });
+    loadDashboardData();
   }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      console.log('🔥 Dashboard: Loading data from Firebase...');
+      
+      // Load all data from Firebase
+      const [orders, products, customers] = await Promise.all([
+        firebaseOrderService.getOrders(),
+        firebaseProductService.getProducts(),
+        firebaseCustomerService.getCustomers()
+      ]);
+
+      // Calculate stats
+      const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+      const recentOrders = orders
+        .slice(0, 5)
+        .map(order => ({
+          id: order.id,
+          customer: order.customerName || order.email,
+          total: order.total,
+          status: order.status,
+          date: new Date(order.createdAt).toLocaleDateString()
+        }));
+      
+      const lowStockProducts = products
+        .filter(product => product.stock < 10)
+        .slice(0, 5)
+        .map(product => ({
+          id: product.id,
+          name: product.name,
+          stock: product.stock
+        }));
+
+      setStats({
+        totalRevenue,
+        totalOrders: orders.length,
+        totalProducts: products.length,
+        totalCustomers: customers.length,
+        recentOrders,
+        lowStockProducts
+      });
+      
+      console.log('🔥 Dashboard: Stats updated from Firebase');
+    } catch (error) {
+      console.error('🔥 Dashboard: Error loading Firebase data:', error);
+    }
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-GB', {

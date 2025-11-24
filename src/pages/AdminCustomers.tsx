@@ -13,9 +13,7 @@ import {
   Calendar,
   ShoppingCart,
   DollarSign
-} from "lucide-react";
-
-interface Customer {
+} from \"lucide-react\";\nimport { firebaseCustomerService } from \"@/lib/firebase-customers\";\n\ninterface Customer {
   id: string;
   name: string;
   email: string;
@@ -39,8 +37,24 @@ const AdminCustomers = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
   useEffect(() => {
-    // Generate customer data from orders
-    const orders = JSON.parse(localStorage.getItem("adminOrders") || "[]");
+    loadCustomers();
+    
+    // Subscribe to real-time updates
+    const unsubscribe = firebaseCustomerService.subscribeToCustomers((customersData) => {
+      setCustomers(customersData);
+      setFilteredCustomers(customersData);
+      console.log('🔥 Customers: Real-time update received');
+    });
+    
+    return () => unsubscribe();
+  }, []);
+  
+  const loadCustomers = async () => {
+    try {
+      console.log('🔥 Customers: Loading from Firebase...');
+      const customersData = await firebaseCustomerService.getCustomers();
+      setCustomers(customersData);
+      setFilteredCustomers(customersData);
     const customerMap = new Map<string, Customer>();
 
     orders.forEach((order: any) => {

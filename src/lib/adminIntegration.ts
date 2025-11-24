@@ -1,22 +1,18 @@
 import { useEffect } from 'react';
-import { initializeDataPersistence } from './dataPersistence';
-import { cloudStorage } from './cloudStorage';
+import { firebaseProductService } from './firebase-products';
+import { firebaseCartService } from './firebase-cart';
 
 // Admin integration utility for handling order events and data management
 export const useAdminIntegration = () => {
   useEffect(() => {
-    // Initialize data persistence system
-    initializeDataPersistence();
-    
-    // Initialize sample data on first load (async now)
-    initializeSampleData();
+    // Initialize Firebase sample data if needed (disabled by default)
+    // initializeSampleData();
     
     // Listen for order creation events from the payment system
     const handleOrderCreated = (event: CustomEvent) => {
       const orderData = event.detail;
       
-      // Add to admin orders
-      const existingOrders = JSON.parse(localStorage.getItem('adminOrders') || '[]');
+      // TODO: Add Firebase orders collection when order management is implemented
       const newOrder = {
         id: orderData.id || Date.now().toString(),
         customerName: orderData.customerName || orderData.email,
@@ -34,8 +30,7 @@ export const useAdminIntegration = () => {
         updatedAt: new Date().toISOString()
       };
       
-      existingOrders.unshift(newOrder);
-      localStorage.setItem('adminOrders', JSON.stringify(existingOrders));
+      console.log('🔥 Order created (Firebase orders collection not yet implemented):', newOrder);
       
       // Update customer data
       updateCustomerData(newOrder);
@@ -52,44 +47,12 @@ export const useAdminIntegration = () => {
 
 // Function to update customer data when orders are created
 const updateCustomerData = (order: any) => {
-  const customers = JSON.parse(localStorage.getItem('adminCustomers') || '[]');
-  const existingCustomerIndex = customers.findIndex((c: any) => c.email === order.email);
-  
-  if (existingCustomerIndex >= 0) {
-    // Update existing customer
-    const customer = customers[existingCustomerIndex];
-    customer.totalOrders = (customer.totalOrders || 0) + 1;
-    customer.totalSpent = (customer.totalSpent || 0) + order.total;
-    customer.lastOrderDate = order.createdAt;
-    customer.orders = customer.orders || [];
-    customer.orders.push({
-      id: order.id,
-      total: order.total,
-      date: order.createdAt,
-      status: order.status
-    });
-  } else {
-    // Create new customer
-    const newCustomer = {
-      id: order.email,
-      name: order.customerName || order.email,
-      email: order.email,
-      totalOrders: 1,
-      totalSpent: order.total,
-      firstOrderDate: order.createdAt,
-      lastOrderDate: order.createdAt,
-      status: 'active',
-      orders: [{
-        id: order.id,
-        total: order.total,
-        date: order.createdAt,
-        status: order.status
-      }]
-    };
-    customers.push(newCustomer);
-  }
-  
-  localStorage.setItem('adminCustomers', JSON.stringify(customers));
+  // TODO: Implement Firebase customers collection when customer management is added
+  console.log('🔥 Customer data update (Firebase customers collection not yet implemented):', {
+    email: order.email,
+    name: order.customerName,
+    orderTotal: order.total
+  });
 };
 
 // Function to dispatch order created events
@@ -100,80 +63,60 @@ export const dispatchOrderCreatedEvent = (orderData: any) => {
   window.dispatchEvent(event);
 };
 
-// Initialize sample data if none exists (disabled to prevent auto-restoration)
+// Initialize sample data in Firebase if none exists
 export const initializeSampleData = async () => {
-  // Check both localStorage and cloud storage before creating sample data
-  const localProducts = localStorage.getItem('adminProducts');
-  
-  // Only create sample data if BOTH localStorage AND cloud are completely empty
-  // This prevents auto-restoration when admin intentionally deletes all products
-  if (!localProducts) {
-    try {
-      const cloudProducts = await cloudStorage.loadProducts();
+  try {
+    // Check if Firebase has any products
+    const products = await firebaseProductService.getProducts();
+    
+    if (products.length === 0) {
+      console.log('🔥 Creating initial sample products in Firebase');
+      const sampleProducts = [
+        {
+          name: 'PSA Card Grading Service',
+          description: 'Professional card grading and authentication service',
+          price: 25.00,
+          category: 'Grading',
+          series: '',
+          rarity: '',
+          stock: 100,
+          image_url: '/api/placeholder/300/200',
+          status: 'active'
+        },
+        {
+          name: 'BGS Card Grading Service',
+          description: 'Beckett Grading Services authentication',
+          price: 30.00,
+          category: 'Grading',
+          series: '',
+          rarity: '',
+          stock: 75,
+          image_url: '/api/placeholder/300/200',
+          status: 'active'
+        },
+        {
+          name: 'Card Sleeves (100 pack)',
+          description: 'Premium card protection sleeves',
+          price: 12.99,
+          category: 'Accessories',
+          series: '',
+          rarity: '',
+          stock: 50,
+          image_url: '/api/placeholder/300/200',
+          status: 'active'
+        }
+      ];
       
-      // If cloud also has no products, then create samples
-      if (cloudProducts.length === 0) {
-        console.log('🔧 Creating initial sample products (both local and cloud empty)');
-        const sampleProducts = [
-          {
-            id: Date.now().toString(),
-            name: 'PSA Card Grading Service',
-            description: 'Professional card grading and authentication service',
-            price: 25.00,
-            category: 'Grading',
-            series: '',
-            rarity: '',
-            stock: 100,
-            image: '/api/placeholder/300/200',
-            status: 'active',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          },
-          {
-            id: (Date.now() + 1).toString(),
-            name: 'BGS Card Grading Service',
-            description: 'Beckett Grading Services authentication',
-            price: 30.00,
-            category: 'Grading',
-            series: '',
-            rarity: '',
-            stock: 75,
-            image: '/api/placeholder/300/200',
-            status: 'active',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          },
-          {
-            id: (Date.now() + 2).toString(),
-            name: 'Card Sleeves (100 pack)',
-            description: 'Premium card protection sleeves',
-            price: 12.99,
-            category: 'Accessories',
-            series: '',
-            rarity: '',
-            stock: 50,
-            image: '/api/placeholder/300/200',
-            status: 'active',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }
-        ];
-        localStorage.setItem('adminProducts', JSON.stringify(sampleProducts));
-      } else {
-        console.log('🔄 Cloud has products, skipping sample data creation');
+      // Create sample products in Firebase
+      for (const product of sampleProducts) {
+        await firebaseProductService.createProduct(product);
       }
-    } catch (error) {
-      console.error('Error checking cloud products:', error);
-      // If cloud check fails, don't create samples to avoid conflicts
+      
+      console.log('🔥 Sample products created in Firebase');
+    } else {
+      console.log('🔥 Firebase already has products, skipping sample data');
     }
-  }
-
-  // Initialize empty arrays for orders and customers if they don't exist
-  if (!localStorage.getItem('adminOrders')) {
-    localStorage.setItem('adminOrders', JSON.stringify([]));
-  }
-  
-  if (!localStorage.getItem('adminCustomers')) {
-    localStorage.setItem('adminCustomers', JSON.stringify([]));
+  } catch (error) {
+    console.error('🔥 Error initializing Firebase sample data:', error);
   }
 };

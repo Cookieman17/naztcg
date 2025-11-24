@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear localStorage</title>
+</head>
+<body>
+    <h1>Clear localStorage for NAZ TCG</h1>
+    <button onclick="clearAll()">Clear All localStorage</button>
+    <button onclick="checkData()">Check Data</button>
+    <div id="output"></div>
+    
+    <script>
+        function clearAll() {
+            localStorage.clear();
+            document.getElementById('output').innerHTML = '<p style="color: green;">✅ All localStorage cleared!</p>';
+        }
+        
+        function checkData() {
+            const output = document.getElementById('output');
+            const keys = Object.keys(localStorage);
+            
+            if (keys.length === 0) {
+                output.innerHTML = '<p>No data in localStorage</p>';
+                return;
+            }
+            
+            let html = '<h3>localStorage Contents:</h3>';
+            keys.forEach(key => {
+                if (key.includes('admin') || key.includes('naztcg')) {
+                    const value = localStorage.getItem(key);
+                    if (value) {
+                        try {
+                            const parsed = JSON.parse(value);
+                            html += `<p><strong>${key}:</strong> ${Array.isArray(parsed) ? parsed.length + ' items' : 'Object'}</p>`;
+                        } catch {
+                            html += `<p><strong>${key}:</strong> ${value.substring(0, 100)}...</p>`;
+                        }
+                    }
+                }
+            });
+            
+            output.innerHTML = html;
+        }
+        
+        // Auto-check on load
+        checkData();
+    </script>
+</body>
+</html>
